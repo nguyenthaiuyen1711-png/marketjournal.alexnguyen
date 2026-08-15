@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Market &amp; Stock Journal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg:#FFFFFF;
+    --surface:#FAFAF9;
+    --surface-2:#F3F2EF;
+    --border:#D8D5CD;
+    --text:#1A1A1A;
+    --muted:#5C5A54;
+    --gold:#9C7A22;
+    --green:#3E7A4F;
+    --red:#9E3E36;
+    --blue:#3E5F7A;
+    --mixed:#6E5590;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Times New Roman', Times, serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--gold);color:#FFFFFF;}
+
+  a{color:var(--gold);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+
+  /* ---------- TICKER ---------- */
+  .ticker-wrap{
+    background:var(--surface-2);
+    border-bottom:1px solid var(--border);
+    overflow:hidden;
+    white-space:nowrap;
+    padding:8px 0;
+  }
+  .ticker{
+    display:inline-block;
+    font-family:'Times New Roman', Times, serif;
+    font-size:12px;
+    letter-spacing:.03em;
+    animation:scroll-left 75s linear infinite;
+  }
+  .ticker span{margin-right:36px;color:var(--muted);}
+  .ticker span b{color:var(--text);font-weight:500;}
+  .up{color:var(--green);}
+  .down{color:var(--red);}
+  .flat{color:var(--blue);}
+  @keyframes scroll-left{
+    0%{transform:translateX(0);}
+    100%{transform:translateX(-50%);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .ticker{animation:none;}
+  }
+
+  /* ---------- HEADER ---------- */
+  header{
+    max-width:920px;
+    margin:0 auto;
+    padding:64px 24px 32px;
+    border-bottom:1px solid var(--border);
+  }
+  .eyebrow{
+    font-family:'Times New Roman', Times, serif;
+    font-size:12px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin-bottom:14px;
+  }
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:clamp(34px,5vw,52px);
+    line-height:1.05;
+    margin:0 0 16px;
+    letter-spacing:-0.01em;
+  }
+  h1 em{
+    font-style:italic;
+    color:var(--gold);
+  }
+  .lede{
+    font-size:16px;
+    line-height:1.6;
+    color:var(--muted);
+    max-width:60ch;
+  }
+  .lede strong{color:var(--text);font-weight:500;}
+  .author{
+    margin-top:22px;
+    font-size:13px;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+  .author::before{
+    content:"— ";
+    color:var(--gold);
+  }
+  .contact{
+    margin-top:8px;
+    font-size:12.5px;
+    color:var(--muted);
+  }
+  .contact a{
+    color:var(--muted);
+    text-decoration:none;
+    border-bottom:1px solid var(--border);
+  }
+  .contact a:hover{
+    color:var(--gold);
+    border-bottom-color:var(--gold);
+  }
+  .contact .dot{
+    margin:0 8px;
+    color:var(--border);
+  }
+
+  /* ---------- WATERMARK ---------- */
+  .watermark{
+    position:relative;
+    text-align:center;
+    padding:14px 24px 4px;
+    font-family:'Fraunces',serif;
+    font-style:italic;
+    font-weight:400;
+    font-size:13px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--muted);
+    user-select:none;
+  }
+
+  /* ---------- NAV TABS ---------- */
+  nav.tabs{
+    max-width:920px;
+    margin:0 auto;
+    padding:0 24px;
+    display:flex;
+    gap:4px;
+    border-bottom:1px solid var(--border);
+    overflow-x:auto;
+  }
+  nav.tabs button{
+    font-family:'Times New Roman', Times, serif;
+    font-size:13px;
+    letter-spacing:.03em;
+    background:none;
+    border:none;
+    color:var(--muted);
+    padding:18px 16px 16px;
+    cursor:pointer;
+    border-bottom:2px solid transparent;
+    white-space:nowrap;
+    transition:color .15s ease;
+  }
+  nav.tabs button .n{
+    color:var(--muted);
+    font-size:11px;
+    margin-left:6px;
+  }
+  nav.tabs button:hover{color:var(--text);}
+  nav.tabs button.active{
+    color:var(--text);
+    border-bottom-color:var(--gold);
+  }
+
+  main{
+    max-width:920px;
+    margin:0 auto;
+    padding:40px 24px 120px;
+  }
+  section.panel{display:none;}
+  section.panel.active{display:block;animation:fade .35s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  .panel-intro{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:16px;
+    margin-bottom:28px;
+    flex-wrap:wrap;
+  }
+  .panel-intro h2{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:26px;
+    margin:0 0 6px;
+  }
+  .panel-intro p{
+    color:var(--muted);
+    font-size:14px;
+    margin:0;
+    max-width:52ch;
+  }
+  .panel-count{
+    font-family:'Times New Roman', Times, serif;
+    font-size:12px;
+    color:var(--muted);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:6px 14px;
+    white-space:nowrap;
+  }
+
+  /* ---------- ENTRY CARDS ---------- */
+  details.entry{
+    border:1px solid var(--border);
+    border-radius:10px;
+    background:var(--surface);
+    margin-bottom:10px;
+    overflow:hidden;
+  }
+  details.entry[open]{
+    background:var(--surface-2);
+    border-color:#B8B4A8;
+  }
+  details.entry summary{
+    list-style:none;
+    cursor:pointer;
+    padding:18px 20px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  details.entry summary::-webkit-details-marker{display:none;}
+  .ticker-filter{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:20px;
+  }
+  .ticker-filter button{
+    font-family:'Times New Roman', Times, serif;
+    font-size:12px;
+    letter-spacing:.02em;
+    background:var(--surface);
+    border:1px solid var(--border);
+    color:var(--muted);
+    padding:6px 13px;
+    border-radius:20px;
+    cursor:pointer;
+  }
+  .ticker-filter button:hover{color:var(--text);}
+  .ticker-filter button.active{
+    background:var(--text);
+    color:var(--bg);
+    border-color:var(--text);
+  }
+  .ticker-chip{
+    font-family:'Times New Roman', Times, serif;
+    font-weight:bold;
+    font-size:12px;
+    letter-spacing:.03em;
+    color:var(--text);
+    border:1px solid var(--border);
+    background:var(--surface);
+    border-radius:6px;
+    padding:4px 9px;
+    white-space:nowrap;
+    flex-shrink:0;
+  }
+  .date-chip{
+    font-family:'Times New Roman', Times, serif;
+    font-size:11px;
+    color:var(--muted);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:4px 8px;
+    white-space:nowrap;
+    flex-shrink:0;
+  }
+  .entry-title{
+    font-family:'Fraunces',serif;
+    font-size:16.5px;
+    font-weight:500;
+    flex:1;
+    min-width:0;
+    color:var(--text);
+  }
+  .tag{
+    font-family:'Times New Roman', Times, serif;
+    font-size:10px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    padding:4px 9px;
+    border-radius:20px;
+    white-space:nowrap;
+    flex-shrink:0;
+    border:1px solid transparent;
+  }
+  .tag-bullish{color:var(--green);background:rgba(79,157,105,.12);border-color:rgba(79,157,105,.35);}
+  .tag-bearish{color:var(--red);background:rgba(181,82,74,.12);border-color:rgba(181,82,74,.35);}
+  .tag-cautious{color:var(--gold);background:rgba(201,160,60,.12);border-color:rgba(201,160,60,.35);}
+  .tag-neutral{color:var(--blue);background:rgba(91,132,166,.12);border-color:rgba(91,132,166,.35);}
+  .tag-mixed{color:var(--mixed);background:rgba(155,127,191,.12);border-color:rgba(155,127,191,.35);}
+
+  .chevron{
+    color:var(--muted);
+    transition:transform .2s ease;
+    flex-shrink:0;
+    font-size:12px;
+  }
+  details.entry[open] .chevron{transform:rotate(90deg);}
+
+  .entry-body{
+    padding:0 20px 26px 20px;
+    font-size:14.5px;
+    line-height:1.68;
+    color:#333330;
+    border-top:1px solid var(--border);
+    margin-top:2px;
+    padding-top:18px;
+  }
+  .entry-body .src{
+    display:block;
+    font-family:'Times New Roman', Times, serif;
+    font-size:11.5px;
+    color:var(--muted);
+    margin-bottom:16px;
+    word-break:break-word;
+  }
+  .entry-body .src a{
+    color:var(--gold);
+    text-decoration:underline;
+  }
+  .entry-body .src a:hover{
+    color:var(--text);
+  }
+  .entry-body h4{
+    font-family:'Times New Roman', Times, serif;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    font-size:11.5px;
+    color:var(--gold);
+    margin:22px 0 8px;
+  }
+  .entry-body h4:first-of-type{margin-top:0;}
+  .entry-body p{margin:0 0 12px;}
+  .entry-body ul{margin:0 0 12px;padding-left:20px;}
+  .entry-body li{margin-bottom:6px;}
+  .entry-body strong{color:var(--text);font-weight:600;}
+  .entry-body em{color:var(--muted);}
+  .risk-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    margin:8px 0 16px;
+  }
+  @media (max-width:640px){.risk-grid{grid-template-columns:1fr;}}
+  .risk-box{
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:12px 14px;
+  }
+  .risk-box.bull{border-left:3px solid var(--green);}
+  .risk-box.bear{border-left:3px solid var(--red);}
+  .risk-box p, .risk-box ul{margin:0;font-size:13.5px;}
+  .risk-label{
+    font-family:'Times New Roman', Times, serif;
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    margin-bottom:6px;
+    display:block;
+  }
+  .risk-box.bull .risk-label{color:var(--green);}
+  .risk-box.bear .risk-label{color:var(--red);}
+
+  .raw-table{
+    width:100%;
+    border-collapse:collapse;
+    margin-bottom:18px;
+    font-size:12.5px;
+    border:1px solid var(--border);
+    border-radius:8px;
+    overflow:hidden;
+  }
+  .raw-table th, .raw-table td{
+    border:1px solid var(--border);
+    padding:8px 10px;
+    text-align:left;
+    vertical-align:top;
+  }
+  .raw-table th{
+    background:var(--surface-2);
+    font-weight:600;
+    color:var(--muted);
+    text-transform:uppercase;
+    font-size:10.5px;
+    letter-spacing:.05em;
+  }
+  .raw-table td{background:var(--surface);}
+
+  /* ---------- CONCEPTS ---------- */
+  .principles-box{
+    border:1px solid var(--border);
+    border-radius:10px;
+    background:var(--surface);
+    padding:18px 20px;
+    margin-bottom:22px;
+  }
+  .principles-box ul{
+    margin:0;
+    padding-left:20px;
+  }
+  .principles-box li{
+    margin-bottom:8px;
+    font-size:14px;
+    line-height:1.6;
+  }
+  .principles-box li:last-child{margin-bottom:0;}
+  .principles-box strong{color:var(--text);}
+  .concept-filter{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:18px;
+  }
+  .concept-filter button{
+    font-family:'Times New Roman', Times, serif;
+    font-size:12px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    color:var(--muted);
+    padding:6px 13px;
+    border-radius:20px;
+    cursor:pointer;
+  }
+  .concept-filter button:hover{color:var(--text);}
+  .concept-filter button.active{
+    background:var(--text);
+    color:var(--bg);
+    border-color:var(--text);
+  }
+  .concept-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .concept-table th, .concept-table td{
+    border:1px solid var(--border);
+    padding:10px 12px;
+    text-align:left;
+    vertical-align:top;
+  }
+  .concept-table th{
+    background:var(--surface-2);
+    font-weight:600;
+    color:var(--muted);
+    text-transform:uppercase;
+    font-size:10.5px;
+    letter-spacing:.05em;
+  }
+  .concept-table td{background:var(--surface);}
+  .concept-table td:first-child{font-weight:600;white-space:nowrap;}
+  .concept-table .cat-pill{
+    display:inline-block;
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    padding:2px 8px;
+    border-radius:20px;
+    border:1px solid var(--border);
+    color:var(--muted);
+    white-space:nowrap;
+  }
+
+  /* ---------- EMPTY STATE ---------- */
+  .empty{
+    border:1px dashed var(--border);
+    border-radius:12px;
+    padding:48px 32px;
+    text-align:center;
+  }
+  .empty .icon{
+    font-family:'Fraunces',serif;
+    font-style:italic;
+    font-size:32px;
+    color:var(--gold);
+    margin-bottom:14px;
+  }
+  .empty h3{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:20px;
+    margin:0 0 10px;
+  }
+  .empty p{
+    color:var(--muted);
+    font-size:14px;
+    max-width:46ch;
+    margin:0 auto 22px;
+    line-height:1.6;
+  }
+  .ghost-row{
+    display:flex;
+    gap:10px;
+    max-width:520px;
+    margin:0 auto;
+    text-align:left;
+  }
+  .ghost-row input, .ghost-row select{
+    flex:1;
+    background:var(--surface);
+    border:1px solid var(--border);
+    color:var(--muted);
+    font-family:'Times New Roman', Times, serif;
+    font-size:12.5px;
+    padding:10px 12px;
+    border-radius:8px;
+  }
+  .ghost-row button{
+    background:var(--gold);
+    color:#0B0E11;
+    border:none;
+    font-family:'Times New Roman', Times, serif;
+    font-weight:600;
+    font-size:12.5px;
+    padding:10px 16px;
+    border-radius:8px;
+    cursor:not-allowed;
+    opacity:.55;
+  }
+  .template-note{
+    margin-top:28px;
+    font-family:'Times New Roman', Times, serif;
+    font-size:11.5px;
+    color:var(--muted);
+    text-align:left;
+    border-top:1px solid var(--border);
+    padding-top:20px;
+  }
+  .template-note pre{
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:14px 16px;
+    overflow-x:auto;
+    color:#4A4842;
+    font-size:11.5px;
+    line-height:1.6;
+  }
+
+  footer{
+    max-width:920px;
+    margin:0 auto;
+    padding:24px;
+    color:var(--muted);
+    font-family:'Times New Roman', Times, serif;
+    font-size:11.5px;
+    border-top:1px solid var(--border);
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="watermark">NGUYEN, Thai Uyen Alex</div>
+
+<div class="ticker-wrap">
+  <div class="ticker" id="tickerTape"></div>
+</div>
+
+<header>
+  <div class="eyebrow">Personal Research Log &middot; Est. June 2026</div>
+  <h1>Market &amp; Stock <em>Journal</em></h1>
+  <p class="lede">A working notebook where I practice writing macro and equity analysis. <strong>Still early in the process</strong> — some entries are rough, not yet in polished house style. I keep the early ones in place on purpose, to track how the thinking sharpens over time.</p>
+  <div class="author">NGUYEN, Thai Uyen Alex</div>
+  <div class="contact">
+    <a href="https://www.linkedin.com/in/thai-uyen-nguyen" target="_blank" rel="noopener noreferrer">linkedin.com/in/thai-uyen-nguyen</a>
+    <span class="dot">&middot;</span>
+    <a href="mailto:nguyenthaiuyen1711@gmail.com">nguyenthaiuyen1711@gmail.com</a>
+    <span class="dot">&middot;</span>
+    <a href="mailto:1155244322@link.cuhk.edu.hk">1155244322@link.cuhk.edu.hk</a>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button data-target="notes" class="active">01 &middot; Daily Market Notes<span class="n">(17)</span></button>
+  <button data-target="watchlist">02 &middot; Stock Watchlist<span class="n">(12)</span></button>
+  <button data-target="deals">03 &middot; Deal Tracker — M&amp;A / IPO<span class="n">(3)</span></button>
+  <button data-target="concepts">04 &middot; Financial Concepts Learnt<span class="n">(21)</span></button>
+</nav>
+
+<main>
+
+  <!-- =========================================================
+       01 DAILY MARKET NOTES
+  ========================================================== -->
+  <section class="panel active" id="notes">
+    <div class="panel-intro">
+      <div>
+        <h2>Daily Market Notes</h2>
+        <p>Macro events, Fed decisions, and market-moving news — logged the day they happen, with a view, a thesis, and what I'm watching next.</p>
+      </div>
+      <div class="panel-count">17 entries &middot; Jun&ndash;Jul 2026</div>
+    </div>
+
+    <div id="entries"><!-- entries injected by JS --></div>
+  </section>
+
+  <!-- =========================================================
+       02 STOCK WATCHLIST
+  ========================================================== -->
+  <section class="panel" id="watchlist">
+    <div class="panel-intro">
+      <div>
+        <h2>Stock Watchlist</h2>
+        <p>Tracking core tickers over time — each entry is a dated thesis update: view, what changed, and what would confirm or break it.</p>
+      </div>
+      <div class="panel-count">12 updates &middot; 7 tickers</div>
+    </div>
+
+    <div class="ticker-filter" id="tickerFilter"></div>
+
+    <div id="watchEntries"><!-- entries injected by JS --></div>
+  </section>
+
+  <!-- =========================================================
+       03 DEAL TRACKER
+  ========================================================== -->
+  <section class="panel" id="deals">
+    <div class="panel-intro">
+      <div>
+        <h2>Deal Tracker — M&amp;A / IPO</h2>
+        <p>Beginner's notes on M&amp;A and IPO deals as they hit the news — deal logic, financing structure, and market reaction.</p>
+      </div>
+      <div class="panel-count">3 deals logged</div>
+    </div>
+
+    <div class="ticker-filter" id="dealFilter"></div>
+
+    <div id="dealEntries"><!-- entries injected by JS --></div>
+  </section>
+
+  <!-- =========================================================
+       04 FINANCIAL CONCEPTS
+  ========================================================== -->
+  <section class="panel" id="concepts">
+    <div class="panel-intro">
+      <div>
+        <h2>Financial Concepts Learnt</h2>
+        <p>Concepts explained in my own words, anchored to a real example rather than a textbook definition.</p>
+      </div>
+      <div class="panel-count" id="conceptsCount">Loading…</div>
+    </div>
+
+    <div class="principles-box" id="principlesBox"></div>
+
+    <div class="concept-filter" id="conceptFilter"></div>
+
+    <table class="concept-table" id="conceptTable">
+      <thead>
+        <tr id="conceptTableHead"></tr>
+      </thead>
+      <tbody id="conceptTableBody"></tbody>
+    </table>
+  </section>
+
+</main>
+
+
+<footer>
+  <span>Market &amp; Stock Journal by NGUYEN, Thai Uyen Alex — personal log, not investment advice</span>
+  <span id="lastUpdated">Last entry: 1 Aug 2026</span>
+</footer>
+
+<script>
+/* ---------------- TAB SWITCHING ---------------- */
+document.querySelectorAll('nav.tabs button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('section.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.target).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+
+/* ---------------- SOURCE LINK HELPER ---------------- */
+function srcHTML(e){
+  if(e.urls && e.urls.length){
+    const links = e.urls.map(u=>`<a href="${u.url}" target="_blank" rel="noopener noreferrer">${u.label}</a>`).join(' &middot; ');
+    return `${e.full} &middot; ${links}`;
+  }
+  if(e.src){
+    return `${e.full} &middot; ${e.src}`;
+  }
+  return `${e.full}`;
+}
+
+/* ---------------- ENTRY DATA ---------------- */
+const entries = [
+{
+  date:`31 Jul`, full:`31 Jul 2026`, tag:`cautious`, tagLabel:`Cautious`,
+  title:`Treasury yields continue to rise as Wall Street calls out Fed's 'inflation credibility shock’`,
+  src:``,
+  urls:[{label:`finance.yahoo.com`, url:`https://finance.yahoo.com/markets/article/treasury-yields-continue-to-rise-as-wall-street-calls-out-feds-inflation-credibility-shock-122430505.html`}],
+  body:`
+    <h4>View</h4>
+    <p>Maintain a cautious view on the FED’s move in the future, given that FED is facing the risk of losing its credibility in controlling rates after announcing that FED will hold hawkish rates, pushing the bond yields high significantly.</p>
+    <h4>Investment thesis</h4>
+    <p>The key issue is no longer whether inflation remains elevated, but whether the Federal Reserve is willing to tighten policy sufficiently to restore confidence. If investors believe the Fed is falling behind the curve, they will demand higher yields to compensate for future inflation risk, putting pressure on bonds and other interest-rate-sensitive assets</p>
+    <h4>What happened</h4>
+    <ul><li>The inflation is already surging high due to the increasing oil prices amid the geopolitical conflict in the Middle East and the AI shortage recently.</li><li>To this situation, the FED has announced to hold rates hawkishly, at the same time warning about the future increasing rates.</li><li>Short term bond yields declined as it is anchored with FED decision, however, long -term bond yields increase as market expect that rates would hike in the future, stock decrease</li></ul>
+    <h4>What it implies</h4>
+    <p>First, the market is worrying about the FED might be behind the curve and react too late amid inflation. This makes investors become more suspicious about whether the FED would take controlling inflation rates seriously, as the FED does not provide guidance to the public and keep maintaining its dovish decision. As a result, even when FED holds rates, the bond yields still rise significantly, as investors now lose their belief in FED decision, thinking that the inflation rates would hike far more in the future, so they demand higher yields to compensate for the high inflation risk. This, on the other hand, makes the bond prices lower and pushes the bond market into a bear market, affecting other asset classes such as stocks and currency.</p>
+    <p>However, the Fed signaled that raising policy rates is not the only way to fight inflation. As long-term Treasury yields rise, borrowing costs increase, tightening financial conditions and slowing economic activity, which helps contain inflation. Therefore, the Fed chose not to raise rates immediately and instead allowed the market to tighten financial conditions on its own. However, Bank of America argued that the Fed cannot rely on the market to do its job indefinitely. If the Fed wants to preserve its inflation-fighting credibility, it may eventually need to raise policy rates. In that case, short-term Treasury yields would likely rise. If investors become more confident that inflation will be brought under control, long-term yields could decline as inflation expectations and the term premium fall, which could provide support for the stock market, particularly growth stocks.</p>
+    <h4>Fixed Income (Negative)</h4>
+    <ul><li>Rising Treasury yields imply falling bond prices, especially for long-duration bonds.</li><li>Duration risk increases as investors demand a higher inflation premium.</li></ul>
+    <h4>Equities (Mixed)</h4>
+    <ul><li>Growth stocks face valuation pressure because higher discount rates reduce the present value of future cash flows.</li><li>Financials may benefit from higher long-term yields if lending margins improve.</li><li>Highly leveraged companies become more vulnerable due to rising financing costs.</li></ul>
+    <h4>Real Estate (Negative)</h4>
+    <ul><li>Higher mortgage rates reduce housing affordability and weaken housing demand.</li></ul>
+    <h4>US Dollar (Mixed to Positive)</h4>
+    <ul><li>If markets increasingly expect additional Fed tightening, the dollar could strengthen.</li><li>However, if investors lose confidence in the Fed's credibility, dollar strength could become less sustainable.</li></ul>
+    <h4>Commodities</h4>
+    <ul><li>Higher rates typically weigh on commodity demand by slowing economic activity.</li><li>However, geopolitical risks and energy supply shocks may continue supporting oil prices.</li></ul>
+    <h4>Risk</h4>
+    <h4>Bull case</h4>
+    <p>If inflation continues to moderate over the coming months, the Fed may regain credibility without aggressive tightening. Long-term Treasury yields could stabilize or decline, supporting both bond prices and equity valuations.</p>
+    <h4>Bear case</h4>
+    <p>If inflation remains sticky while the Fed delays further tightening, investors may continue demanding higher term premiums. Long-term Treasury yields could rise further, putting additional pressure on bonds, growth stocks, and the broader economy.</p>
+    <h4>What to watch</h4>
+    <ul><li>Upcoming CPI and PCE inflation reports.</li><li>Labor market data, particularly payrolls and wage growth.</li><li>Fed communication regarding future rate hikes.</li><li>Changes in the 10-year and 30-year Treasury yields.</li><li>Market-implied probability of additional Fed tightening.</li></ul>
+  `
+},
+{
+  date:`28 Jul`, full:`28 Jul 2026`, tag:`cautious`, tagLabel:`Cautious`,
+  title:`Nvidia drops nearly 5%, leading chip stocks lower amid renewed worries of circular financing`,
+  src:``,
+  urls:[{label:`Nvidia says it isn't using 'circular financing' schemes. 2 famous short sellers disagree.`, url:`https://finance.yahoo.com/news/nvidia-says-it-isnt-using-circular-financing-schemes-2-famous-short-sellers-disagree-100021210.html`},{label:`finance.yahoo.com`, url:`https://finance.yahoo.com/markets/article/nvidia-drops-nearly-5-leading-chip-stocks-lower-amid-renewed-worries-of-circular-financing-193309793.html`}],
+  body:`
+    <h4>View</h4>
+    <p>Maintain a cautious near-term view on AI semiconductor stocks despite unchanged long-term AI fundamentals. The latest sell-off reflects rising concerns over capital allocation and demand quality rather than deterioration in AI demand itself. Investors are increasingly questioning whether AI infrastructure spending is generating sustainable economic returns or merely reinforcing a self-funded investment cycle.</p>
+    <p>Nvidia remains the dominant supplier of AI infrastructure, but concerns that suppliers are increasingly financing their own customers raise questions about the quality of AI demand and whether current semiconductor valuations already assume overly optimistic monetization.</p>
+    <h4>What happened</h4>
+    <ul><li>Nvidia fell nearly <strong>5%</strong>.</li><li>AMD declined over <strong>5%</strong>.</li><li>SK Hynix dropped more than <strong>7%</strong>.</li><li>Micron also fell.</li></ul>
+    <p>The immediate catalyst was reports that Nvidia may guarantee <strong>$250 billion</strong> in financing that OpenAI would use to lease computing infrastructure for a large U.S. AI data-center project.</p>
+    <p>Bloomberg described the arrangement as one of Nvidia's largest financing commitments ever.</p>
+    <p>At the same time:</p>
+    <ul><li>Nvidia announced a <strong>$500B+ AI partnership</strong> with SK Group.</li><li>China reported progress in domestic chip-manufacturing equipment.</li><li>Investors continue questioning hyperscaler AI capex after Alphabet increased spending guidance.</li></ul>
+    <h4>What it implies</h4>
+    <p>The concern is no longer whether hyperscalers will continue buying GPUs.</p>
+    <p>Instead, investors are asking whether those purchases are supported by genuine commercial demand or increasingly depend on financing provided by AI infrastructure suppliers themselves. This also raises the concern of circular financing. Reports that Nvidia may provide financing support for OpenAI's AI infrastructure project have raised questions about the quality of AI demand. If AI developers rely on financing from suppliers to purchase computing infrastructure, part of today's demand may be supported by financial arrangements rather than purely organic customer spending. As a result, investors are becoming more cautious, shifting their focus from rapid revenue growth and AI spending toward whether these investments can ultimately generate sustainable earnings, free cash flow, and attractive returns on capital. Now the question becomes <strong>Can this enormous AI investment generate attractive economic returns?</strong> Simply increasing AI spending is no longer viewed positively if profitability and cash-flow generation remain uncertain.</p>
+    <p>Moreover, China introduces another layer of competitive pressure. Reports that a Chinese company has begun mass-producing key semiconductor manufacturing equipment suggest China may gradually reduce dependence on Western suppliers. Although this does not immediately threaten Nvidia's competitive position, it reinforces concerns that China's AI ecosystem continues narrowing the technological gap.</p>
+    <h4>Risk</h4>
+    <h4>Bear case</h4>
+    <ul><li>AI infrastructure investment increasingly relies on supplier-supported financing.</li><li>Hyperscalers slow future AI capex.</li><li>OpenAI and other AI developers fail to monetize AI quickly enough.</li><li>Semiconductor valuations compress despite continued revenue growth.</li></ul>
+    <h4>Bull case</h4>
+    <ul><li>AI monetization accelerates.</li><li>Financing concerns prove temporary.</li><li>Hyperscalers continue expanding AI infrastructure aggressively.</li><li>Nvidia successfully converts financing commitments into long-term recurring GPU demand.</li></ul>
+    <h4>What to watch</h4>
+    <ul><li>Microsoft's, Amazon's, and Meta's earnings guidance on AI capex.</li><li>Details surrounding Nvidia's financing commitments with OpenAI.</li><li>China's progress in semiconductor equipment manufacturing.</li><li>Credit market indicators (such as Nvidia's CDS spreads), which reflect investor concerns over increasing financial commitments.</li></ul>
+  `
+},
+{
+  date:`27 Jul`, full:`27 Jul 2026`, tag:`cautious`, tagLabel:`Cautious`,
+  title:`Everything is going wrong for oil markets right now`,
+  src:``,
+  urls:[{label:`finance.yahoo.com`, url:`https://finance.yahoo.com/energy/article/why-arent-oil-prices-higher-staggering-drop-in-energy-demand-leaves-strategists-puzzled-100000046.html`}],
+  body:`
+    <h4>View</h4>
+    <p>I have a cautious view on the global oil market, given that oil prices have been highly volatile recently due to the conflict in the Middle East. Although oil supply has been constrained, oil prices have remained contained and have not shown a clear upward or downward trend. Many market participants believe that the main reason is a significant decline in oil demand. When both supply and demand decline, the market can remain relatively balanced, keeping prices contained. The key question is where the decline in oil demand is coming from and whether it is sustainable.</p>
+    <h4>What Happened</h4>
+    <p>The escalating conflict in the Middle East has threatened global oil supply.</p>
+    <p>Oil prices were expected to rise, as they have during many previous supply disruptions. However, oil demand suddenly declined significantly, preventing prices from rising further.</p>
+    <p>Global oil demand is now expected to decline by 1 million barrels per day this year, according to the International Energy Agency's latest monthly oil market report, even as a “recovery in world oil demand is underway.”</p>
+    <p>Demand has fallen faster and more sharply than in any of the past six years, with the exception of the pandemic-driven downturn in 2020.</p>
+    <h4>Why</h4>
+    <p>Normally, when oil demand remains strong while oil supply is disrupted, the global market experiences upward pressure on prices. The imbalance between supply and demand can drive prices significantly higher.</p>
+    <p>However, although oil supply has again been constrained by the escalating conflict in the Middle East, oil prices have remained contained and far below their previous wartime peaks. The reasons behind the unexpectedly sharp decline in demand remain unclear.</p>
+    <p>First, China is the biggest suspect. China is one of the world's largest crude oil importers, yet it has recently cut its imports significantly. This raises questions about how China has been able to reduce its imports and where it is sourcing its oil instead. This mystery remains under investigation.</p>
+    <p>Second, “the market killed demand.” High oil prices and deteriorating economic conditions following the escalation of the Middle East conflict have forced many industries to find ways to reduce oil consumption. For example, countries in Southeast Asia have reduced working hours, European airlines have cut back on flights, transportation demand has declined, China has reduced its oil imports, and the US has released record amounts of oil from its Strategic Petroleum Reserve. As a result, lower economic activity has led to lower oil consumption.</p>
+    <h4>Risks</h4>
+    <p>Key risks include:</p>
+    <p>Weaker-than-expected global oil demand;</p>
+    <p>A sharper-than-expected slowdown in China;</p>
+    <p>A recovery in oil supply if the US-Iran conflict eases.</p>
+    <h4>Bull Case</h4>
+    <p>Oil prices could rise to $120 per barrel if supply disruptions worsen while demand remains resilient.</p>
+    <h4>Bear Case</h4>
+    <p>Oil prices could fall to $70 per barrel if global demand weakens further and oil supply recovers.</p>
+    <h4>Key Takeaways</h4>
+    <p>Oil prices are determined by the balance between supply and demand. Therefore, investors should focus on both sides of the market rather than assuming that escalating conflict in the Middle East will automatically lead to constrained supply and sharply higher oil prices.</p>
+    <p>The key uncertainty is whether the recent decline in oil demand is temporary or sustainable. If demand remains weak, it could continue to offset supply disruptions and keep oil prices contained. Conversely, if demand recovers while supply remains constrained, oil prices could rise significant.</p>
+  `
+},
+{
+  date:`25 Jul`, full:`25 Jul 2026`, tag:`neutral`, tagLabel:`Neutral`,
+  title:`Why the economy may shrug off Trump’s new tariff`,
+  src:``,
+  urls:[{label:`finance.yahoo.com`, url:`https://finance.yahoo.com/economy/policy/article/trumps-flurry-of-tariff-moves-still-leaves-rates-below-pre-supreme-court-peaks-203453333.html`}],
+  body:`
+    <h4>View</h4>
+    <p>Maintain a neutral view on the near term impact of the US trade policy. While the Trump administration continues to announce new tariffs, the effective tariff rates and the effective tariff burden remains below the pre-Supreme Court level due to extensive product exemptions. As a result, the inflationary impact appears less dangerous.</p>
+    <h4>Thesis</h4>
+    <p>The market focuses more on the effective tariff rates rather than the announced rates. Although recent tariff rates seem hawkish, extensive exemptions have prevented the effective tariff burdens from increasing, easing the inflationary pressure across the economy. The next major catalyst is the administration's ongoing investigation into excess industrial capacity, which could materially increase effective tariff rates if expanded.</p>
+    <h4>What happened</h4>
+    <p>Trump announced:</p>
+    <ul><li>10–12.5% global tariffs.</li><li>25% tariffs on Brazil.</li><li>Proposed 50% tariffs on some Canadian goods.</li><li>Planned 100% tariffs on generic drugs beginning in 2028.</li></ul>
+    <p>The Yale Budget Lab's current effective tariff rate estimate is <strong>11.1%</strong>, expected to rise to <strong>11.8%</strong> by year-end.</p>
+    <p>Before the Supreme Court ruling, that rate stood at <strong>13.86%</strong>, and was above <strong>15%</strong> for much of 2025.</p>
+    <p>The Committee for a Responsible Federal Budget estimates the new tariff measures will raise roughly <strong>$950 billion</strong> over the next decade, well below the <strong>$1.9 trillion</strong> projected under the previous IEEPA tariff regime.</p>
+    <h4>Why hasn&#x27;t the overall rate risen more?</h4>
+    <p>The main driver is an <strong>expanding list of exemptions</strong> - covering major categories like oil, plus country-specific goods such as Scotch whisky and Central American textiles. Oxford Economics noted these recent moves won't move the overall effective rate much in its baseline forecast, though it flagged upside risk. Therefore, the announced tariff has overstated the actual tightening in the US trade policy.</p>
+    <h4>Fiscal impact</h4>
+    <p>The Committee for a Responsible Federal Budget estimates:</p>
+    <ul><li>The three latest tariff actions (global, Brazil, Canada) will generate roughly <strong>$950 billion</strong> over a decade</li><li>That's far below the <strong>$1.9 trillion</strong> the struck-down IEEPA tariffs could have raised</li><li>Short-term revenue has also been messy: in June, IEEPA tariff <strong>refunds exceeded tariff revenue</strong> by about $25.5 billion</li></ul>
+    <h4>What to watch</h4>
+    <p>An ongoing investigation into excess structural capacity targeting China, the EU, and 16 other trading partners could become the next lever to push tariffs higher, working around the legal limits set by the Supreme Court.</p>
+    <h4>Analytical takeaway</h4>
+    <p>The article highlights a political paradox: Trump wants to project a tough trade stance through frequent, high-profile announcements, but in substance, legal constraints (from the Supreme Court ruling) and a growing exemption list are keeping actual rates in check.</p>
+    <p>FOCUS ON EFFECTIVE TARIFF RATE</p>
+  `
+},
+{
+  date:`17 Jul`, full:`17 Jul 2026`, tag:`neutral`, tagLabel:`Neutral`,
+  title:`U.S. Dollar Strengthens as Robust Labor Market Supports Higher-for-Longer Rate Expectations`,
+  src:``,
+  urls:[{label:`U.S. Dollar Moves Higher As Retail Sales Meet Estimates: Analysis For EUR/USD, GBP/USD, USD/CAD, USD/JPY`, url:`https://finance.yahoo.com/markets/currencies/articles/u-dollar-moves-higher-retail-163721084.html`}],
+  body:`
+    <h4>Key Takeaways</h4>
+    <p>The US dollars strengthened on Thursday as a series of economic data has been released, suggesting that the US economy still remains resilient. Stable labour market signs have outweighed other mixed signals in the retails and housing sectors, reinforcing expectations that FED may keep interested rates elevated for longer. As the result, bond yields increased higher, supporting the US dollars while affecting other major currencies.</p>
+    <h4>Key economic datas</h4>
+    <p><strong><em>Retail Sales</em></strong></p>
+    <p>Retail Sales rose 0.2% month-over-month, matching market expectations. Although the figure did not surprise investors, it indicated that U.S. consumer spending remains stable despite higher interest rates.</p>
+    <p>However, Retail Sales excluding automobiles fell 0.2%, slightly worse than the expected 0.1% decline. Since automobile purchases are highly volatile, this measure provides a better picture of underlying consumer demand. The weaker reading suggested some moderation in discretionary spending but was not significant enough to alter the overall market narrative.</p>
+    <p><strong><em>Initial Jobless Claims</em></strong></p>
+    <p>Initial Jobless Claims totaled <strong>208,000</strong>, well below the consensus estimate of <strong>217,000</strong>, indicating that fewer Americans filed for unemployment benefits than expected. This suggests that companies continue to retain workers and that the labor market remains tight.</p>
+    <p>A resilient labor market generally supports household income and consumer spending, which can keep inflationary pressures elevated. Consequently, investors reduced the likelihood of near-term Federal Reserve rate cuts.</p>
+    <p><strong><em>Housing Market</em></strong></p>
+    <p>The <strong>NAHB Housing Market Index</strong> declined from <strong>36 to 34</strong>, below expectations of <strong>35</strong>, reflecting weaker sentiment among homebuilders. Higher mortgage rates continue to weigh on housing demand, making the housing sector one of the softer areas of the U.S. economy.</p>
+    <p>Despite this weakness, the housing data had a limited impact on overall market sentiment because investors placed greater emphasis on the stronger labor market.</p>
+    <h4>Market reaction</h4>
+    <p>Strong claims data reinforced the idea that the Fed doesn't need to rush into rate cuts, which pushed Treasury yields higher. Higher US yields make dollar assets more attractive to foreign investors. As a result, foreign investors must purchase USD to invest in the US market, pushing the USD demand high significantly and the USD index surge accordingly.</p>
+    <h4>Currency Analysis</h4>
+    <p><strong><em>USD</em></strong></p>
+    <p>The Dollar Index moved above the <strong>100.50–100.65 support zone</strong> and attempted to break above <strong>100.75</strong>. A sustained move above this level could open the way toward the <strong>50-day moving average near 100.92</strong>, followed by resistance around <strong>101.15–101.30</strong>.</p>
+    <p><strong><em>EUR/USD</em></strong></p>
+    <p>EUR/USD has retreated after traders took profit after the rebound. Moreover, as USD increased, EUR/USD also declined</p>
+    <p><strong><em>GBP/USD</em></strong></p>
+    <p>Sterling weakened despite UK GDP meeting expectations. While manufacturing output surprised to the upside, industrial production contracted more sharply than forecast, raising concerns about the UK's economic momentum. Combined with the stronger U.S. dollar, these factors pushed GBP/USD lower.</p>
+    <p><strong><em>USD/CAD</em></strong></p>
+    <p>USD/CAD traded largely sideways. Normally, weaker commodity prices, particularly declines in gold and silver, would weigh on the Canadian dollar, as Canada is a commodity-exporting economy. However, this effect was largely offset by other market forces, leaving the pair relatively unchanged.</p>
+    <p><strong><em>USD/JPY</em></strong></p>
+    <p>USD/JPY advanced as U.S. Treasury yields rebounded. Rising U.S. yields widened the interest rate differential between the United States and Japan, increasing demand for dollar-denominated assets. This supported further gains in USD/JPY, with the pair approaching its multi-decade high near 162.80</p>
+    <h4>Why it matters</h4>
+    <p>The labor market remains the dominant driver of U.S. monetary policy expectations.</p>
+    <p>Stronger-than-expected employment data outweighed weaker housing indicators.</p>
+    <p>Higher Treasury yields boosted demand for the U.S. dollar.</p>
+    <p>The dollar's strength pressured EUR/USD and GBP/USD, while supporting USD/JPY.</p>
+    <p>Markets continue to focus on whether resilient economic data will keep the Federal Reserve in a higher-for-longer policy stance.</p>
+    <h4>Personal Reflection</h4>
+    <p>Today's market reinforced an important lesson: not all economic indicators carry equal weight. Although housing data was disappointing and core retail sales softened slightly, investors focused primarily on the labor market because employment is a key determinant of inflation and Federal Reserve policy. Understanding which data the market prioritizes is just as important as interpreting the data itself.</p>
+    <p>Another takeaway is the close relationship between economic data, interest rate expectations, Treasury yields, and currency movements. A stronger labor market increases the probability of higher interest rates, pushing Treasury yields upward. Higher yields attract foreign capital into U.S. assets, increasing demand for the U.S. dollar and influencing major currency pairs accordingly. This chain of events is a fundamental framework I should continue applying when analyzing future macroeconomic news.</p>
+  `
+},
+{
+  date:`16 Jul`, full:`16 Jul 2026`, tag:`neutral`, tagLabel:`Neutral`,
+  title:`US Dollar Weakens as Softer CPI Eases Fed Hike Expectations`,
+  src:``,
+  urls:[{label:`www.investing.com`, url:`https://www.investing.com/news/forex-news/asia-fx-yen-steadies-as-intervention-risks-linger-dollar-eyes-cpi-waller-4789678`}],
+  body:`
+    <h4>Key Takeaway</h4>
+    <p>June CPI came in substantially below expectations, reducing immediate Fed hike expectations and pressuring the U.S. dollar. However, the disinflation was largely driven by falling energy prices, while oil prices have already rebounded due to renewed U.S.–Iran tensions. Therefore, the market's focus is shifting from June's inflation relief toward the sustainability of future inflation trends.</p>
+    <h4>Market Reaction</h4>
+    <ul><li>usd -0.3%</li><li>EUR +0.4%</li><li>GBP +0.3%</li><li>Treasury yields lower</li><li>Fed hike probabilities declined</li></ul>
+    <h4>Why It Happened</h4>
+    <p>Inflation surprise</p>
+    <ul><li>Headline CPI: -0.4% MoM</li><li>Core CPI: 0.0% MoM</li></ul>
+    <p>Main driver:</p>
+    <ul><li>Gasoline -9.7%</li><li>Energy -5.7%</li></ul>
+    <h4>Why It Matters</h4>
+    <p>For the Fed</p>
+    <ul><li>More breathing room.</li><li>Less urgency to hike.</li></ul>
+    <p>For the Dollar</p>
+    <ul><li>Lower expected rates</li></ul>
+    <p>→ lower yield advantage</p>
+    <p>→ weaker USD -> stronger JPY, EUR</p>
+    <p>For Risk Assets</p>
+    <ul><li>Lower discount rates</li></ul>
+    <p>→ supportive for equities.</p>
+    <p>For Bonds market</p>
+    <ul><li>Bond prices decline -> Bond yield increase</li></ul>
+    <h4>The Debate</h4>
+    <p>Is inflation actually cooling, or did June simply benefit from temporarily lower oil prices?</p>
+    <p>Because if June oil price decreases and July oil price increases again, future CPI may look very different and FED would have to hike rates, affecting different asset markets such as bonds, stocks, Fx,..</p>
+    <h4>What to watch</h4>
+    <ul><li>July CPI</li><li>Brent crude</li><li>Fed communication</li><li>U.S.–Iran conflict developments</li></ul>
+    <p>The softer June CPI report provided near-term relief for markets and weakened the U.S. dollar by reducing expectations of additional Fed tightening. However, because the disinflation was driven largely by falling energy prices and oil has already rebounded, the sustainability of lower inflation remains uncertain. I maintain a neutral-to-slightly bearish near-term view on USD, while monitoring energy prices and Fed communication for signs of renewed inflation pressure.</p>
+  `
+},
+{
+  date:`14 Jul`, full:`14 Jul 2026`, tag:`cautious`, tagLabel:`Cautious`,
+  title:`Iran Shock and Fed Reaction Function`,
+  src:``,
+  urls:[{label:`www.investing.com`, url:`https://www.investing.com/news/stock-market-news/us-stock-futures-fall-amid-more-iran-strikes-q2-earnings-inflation-on-tap-4789609`},{label:`www.investing.com`, url:`https://www.investing.com/analysis/what-will-it-take-for-the-fed-to-hike-200683757`},{label:`US Markets Open to a War: Futures Sink, Oil Spikes as Fresh Strikes Hit Iran | Investing.com`, url:`https://www.investing.com/analysis/us-markets-open-to-a-war-futures-sink-oil-spikes-as-fresh-strikes-hit-iran-200683802`}],
+  body:`
+    <p>The market is now facing geopolitical risk and risk of further FED tightening simultaneously. The market is predicting 2 scenarios. Under the first scenario, the inflation will improve soon, and the FED will hold rates or eventually cut rates. Under the second scenario, the inflation will remain sticky while the job market stays stable, FED will be hawkish and rates will be hiked. While both outcomes remain possible, recent developments surrounding the AI investment boom and the escalating U.S.–Iran conflict have shifted market attention toward the latter scenario.  The escalating conflict in the Middle East has raised hot concerns about the constrained oil supply through the Strait of Hormuz, making the oil price accelerate significantly. As a result, this would affect a wide range of industries, adding renewed inflationary pressure. Moreover, Robust AI-related investment continues to drive exceptionally strong demand for AI chips and data center infrastructure. As demand outpaces supply, supply constraints and rising input costs could further contribute to short-term inflationary pressures. The bear case is if inflation remains sticky, the FED will have to make a hawkish decision to increase the rate in accordance with the stable employment market. In that case, such an outcome would likely weigh on both the bond and equity markets. Accelerating inflation rates will make the bond yields increase significantly while the bond prices will decline, making the cost of borrowing surge for companies. Meanwhile, inflation will make the discounted rates hike, compressing the NPV and eventually, decreasing the companies valuation and stock prices. Overall, these dynamics could tighten financial conditions and slow economic activity. Consequently, the concerns of escalating inflation risk still remain, raising concerns across market sectors. Now the market will have to watch closely the FED’s next FOMC and the next CPI release for further FED’s signal on the future path.</p>
+  `
+},
+{
+  date:`8 Jul`, full:`8 Jul 2026`, tag:`mixed`, tagLabel:`Mixed`,
+  title:`Micron, Samsung, SK Hynix just dragged memory stocks into a bear market`,
+  src:``,
+  urls:[{label:`Micron, Samsung, SK Hynix just dragged memory stocks into a bear market`, url:`https://finance.yahoo.com/markets/article/micron-samsung-sk-hynix-just-dragged-memory-stocks-into-a-bear-market-154549356.html`}],
+  body:`
+    <h4>View</h4>
+    <p>Maintain a constructive long-term view on the AI memory industry, while acknowledging that the sector has entered a valuation correction following an exceptional rally.</p>
+    <h4>Investment thesis</h4>
+    <p>The recent sell-off reflects deteriorating investor sentiment and elevated valuation expectations rather than a collapse in AI demand or memory fundamentals.</p>
+    <h4>What happened?</h4>
+    <p>1. Memory stocks officially entered a bear market</p>
+    <p>Since June 25, Micron, Samsung, SK Hynix, DRAM,. have all fallen more than 20% from their recent highs.</p>
+    <p>2. Samsung delivered strong earnings</p>
+    <p>Samsung reported strong revenue, but the stock still declined. This tells investors something important that market is no longer rewarding good earnings as easily as before.</p>
+    <p>3. Selling spread across the semiconductor sector</p>
+    <p>The correction was no longer limited to memory companies. Sandisk, Intel, .. also sold off sharply. Overall, semiconductor companies have lost roughly $1.5 trillion of market value in only seven trading days.</p>
+    <h4>What it implies</h4>
+    <p>First, the correction represents a valuation adjustment rather than a deterioration in business fundamentals. AI demand remains robust, memory shortages continue to exist, and industry earnings remain strong. However, following the sector's substantial appreciation over recent months, share prices still seem to depreciate. As a result, investors now require stronger evidence of sustainable earnings growth, margin expansion, and free cash flow generation before assigning higher valuations.</p>
+    <p>Second, investor sentiment has clearly become more cautious. Earlier pullbacks in memory stocks were quickly bought by investors, reflecting strong confidence in the AI trade. This time, however, the sell-off has become broader, lasted longer, and pushed many industry leaders into bear-market territory. This indicates that investors are becoming increasingly disciplined, shifting their focus from AI enthusiasm to valuation discipline and questioning whether future growth can continue to justify current multiples.</p>
+    <h4>Risk</h4>
+    <h4>Bear Case</h4>
+    <p>The primary downside risk is that hyperscaler AI spending fails to generate sufficient returns, leading investors to further compress valuation multiples across the semiconductor sector despite resilient earnings. If management guidance indicates slowing memory pricing or weaker AI infrastructure demand, the current correction could deepen</p>
+    <h4>Bull case</h4>
+    <p>if AI demand remains robust, memory shortages persist, and companies continue delivering earnings above expectations alongside strong forward guidance, investor confidence could recover, allowing valuations to stabilize and resume their longer-term upward trend.</p>
+    <h4>What to watch</h4>
+    <ul><li>Micron's next earnings guidance.</li><li>Samsung and SK Hynix commentary on chip demand and pricing.</li><li>Hyperscaler AI capex plans (Microsoft, Amazon, Meta, Alphabet).</li></ul>
+    <h4>Investment conclusion</h4>
+    <p>The recent correction does not indicate that the AI memory cycle has ended. Instead, it reflects a transition in market behavior. Earlier in the rally, investors rewarded nearly every positive AI headline. Now, expectations have become significantly higher, and companies must deliver tangible earnings growth, margin expansion, and cash-flow generation to justify their elevated valuations.</p>
+  `
+},
+{
+  date:`7 Jul`, full:`7 Jul 2026`, tag:`bullish`, tagLabel:`Bullish`,
+  title:`U.S. Equities: Can the AI Bull Market Extend into H2 2026?`,
+  src:``,
+  urls:[{label:`'It's a bull market': Wall Street sees more upside in stocks for the second half of 2026`, url:`https://finance.yahoo.com/markets/article/its-a-bull-market-wall-street-sees-more-upside-in-stocks-for-the-second-half-of-2026-120220657.html`}],
+  body:`
+    <p><strong>View: Maintain a constructive but increasingly selective view on U.S. equities.</strong></p>
+    <h4>Investment thesis</h4>
+    <p>The AI-driven bull market remains fundamentally intact, supported by resilient corporate earnings, easing macro headwinds, and a more supportive interest-rate outlook following softer labor market data. However, leadership within the AI trade is beginning to evolve as investors shift their focus from AI expectations toward AI monetization.</p>
+    <h4>What Happened</h4>
+    <ul><li>S&P 500 posted its strongest quarter in six years, closing at 7,483.24 (July 2).</li><li>The Philadelphia Semiconductor Index (SOX) had its best quarter on record; small- and mid-cap stocks also outperformed.</li><li>June nonfarm payrolls rose 57,000, missing expectations — signaling a cooling, not overheating, labor market.</li><li>Oil and gasoline prices fell following the US-Iran ceasefire.</li><li>FactSet: industry analysts project a 21% S&P gain over the next 12 months.</li><li>JPMorgan: raised its year-end S&P target to 7,800, while separately flagging flash-crash risk.</li><li>Magnificent Seven stocks have underperformed semiconductors; Ed Yardeni notes investors are questioning whether hyperscaler AI capex will ever generate a return.</li><li>Schwab's Omar Aguilar frames this as the "middle innings" of the AI trade and is rotating away from megacap overweight into industrials, healthcare, materials, small/mid-caps, and international equities.</li></ul>
+    <h4>What It Implies</h4>
+    <p><strong>1. The bull market is increasingly being driven by earnings rather than liquidity</strong></p>
+    <p>Earlier phases of the AI rally were largely supported by expanding valuation multiples and investor optimism surrounding future AI adoption. Today, however, investors are becoming more disciplined. Future stock performance will increasingly depend on whether companies can demonstrate tangible AI monetization through accelerating revenue growth, expanding operating margins, and stronger cash flow generation.</p>
+    <p>As a result, earnings season becomes significantly more important than macro sentiment alone. Companies that fail to validate AI investment through financial performance may experience valuation compression despite maintaining strong long-term growth prospects.</p>
+    <p><strong>2. Investors are increasingly questioning hyperscaler AI returns</strong></p>
+    <p>Another major debate emerging across financial markets concerns the return on AI infrastructure spending by hyperscalers such as Microsoft, Amazon, Alphabet, and Meta.</p>
+    <p>These companies are collectively investing hundreds of billions of dollars into AI infrastructure. While long-term strategic positioning remains compelling, investors are asking whether this unprecedented level of capital expenditure will ultimately generate sufficient revenue growth and profitability.</p>
+    <p>Should AI monetization fail to materialize over the coming quarters, elevated capital expenditure could continue to pressure operating margins and free cash flow, leading investors to reassess current valuation multiples across both hyperscalers and AI-related suppliers.</p>
+    <h4>Risks</h4>
+    <h4>Bear Case</h4>
+    <p>First, AI monetization may prove slower than expected, preventing companies from generating sufficient returns on their substantial AI investments. Second, persistent inflation could force the Federal Reserve to maintain a more hawkish policy stance, increasing discount rates and compressing equity valuations. Third, semiconductor stocks may experience further multiple compression following their exceptional performance. Finally, disappointing hyperscaler earnings or weaker-than-expected AI-related guidance could trigger broader investor rotation away from expensive AI leaders.</p>
+    <h4>Bull Case</h4>
+    <p>Conversely, the current bull market could extend if AI adoption accelerates across industries and companies begin demonstrating meaningful commercial returns from AI investments.</p>
+    <p>Strong Q2 earnings accompanied by evidence of AI monetization, combined with moderating inflation and a stable Federal Reserve policy outlook, would likely reinforce investor confidence. Continued market broadening into industrials, healthcare, materials, infrastructure, and smaller-cap companies would also support a healthier and more sustainable bull market.</p>
+    <h4>What to Watch</h4>
+    <p>The primary focus remains the upcoming Q2 earnings season, particularly whether companies can provide convincing evidence that AI investment is translating into revenue acceleration, improving margins, and stronger free cash flow.</p>
+    <p>Beyond corporate earnings, watch inflation indicators such as Core PCE and CPI . Any indication that inflation is moderating could further reduce discount-rate pressure on equity valuations.</p>
+    <p>Finally, investors should continue monitoring semiconductor earnings and forward guidance to assess whether current valuations remain justified, as well as market breadth to determine whether leadership continues expanding beyond technology into other cyclical sectors.</p>
+  `
+},
+{
+  date:`3 Jul`, full:`3 Jul 2026`, tag:`cautious`, tagLabel:`Cautious`,
+  title:`US Labor Market — June 2026 Jobs Report`,
+  src:``,
+  urls:[{label:`Unemployment dipped, but more people left the workforce: What's going on in the job market?`, url:`https://finance.yahoo.com/economy/article/unemployment-dipped-but-more-people-left-the-workforce-whats-going-on-in-the-job-market-185543008.html`}],
+  body:`
+    <h4>View</h4>
+    <p>Maintain cautious stance on near-term US labor market outlook. The headline unemployment rate decline (to 4.2%) is misleading - it was driven by 720,000 people exiting the labor force, not by genuine job creation. Underneath the surface, the labor market is stagnating rather than growing, and is increasingly vulnerable to a negative shock.</p>
+    <h4>What happened</h4>
+    <ul><li>June payrolls added only 57,000 jobs, missing economist expectations; headline unemployment rate fell to 4.2%.</li><li>Labor force participation rate dropped to 61.5% - lowest since March 2021, driven by 720,000 people leaving the workforce in a single month. Prime-age participation (25–54) fell to 83.3%, ruling out aging demographics as the sole explanation.</li><li>Long-term unemployment remains above 27% - the highest outside of COVID since 2016. 1.9 million people have been out of work for 7+ months, up 286,000 YoY.</li><li>JOLTS data: 7.6 million job openings (above consensus), but hiring rate held flat at 3.3%, quit rate flat, layoff rate ticked up slightly - a "frozen" labor market where neither side is moving.</li><li>Leisure and hospitality, typically a seasonal hiring driver in June, failed to hire up, unusual given the World Cup period.</li><li>U-6 (broad unemployment including underemployed and marginally attached workers) remains above pre-pandemic levels. Unemployment rate for recent college graduates is also elevated.</li></ul>
+    <h4>What it implies</h4>
+    <p>First, the unemployment rate decline is a <strong>statistical artifact, not a signal of strength.</strong> The U-3 rate fell because the denominator shrank (fewer people counted as labor force participants), not because more people found jobs. As Gould (EPI) noted, people may be leaving because they don't believe jobs exist for them - a discouragement effect, which is qualitatively more concerning than a simple cyclical slowdown.</p>
+    <p>Second, the JOLTS data reveals a <strong>structurally frozen labor market</strong>: openings are high but hiring is not happening, quits are flat, and layoffs are edging up. This combination - high openings, low hiring, rising layoffs - is internally inconsistent and suggests a mismatch between available positions and job-seekers, rather than genuine demand-supply balance.</p>
+    <p>Third, the concentration of economic gains in a small number of firms and households (Swonk's point) means <strong>aggregate data is masking distributional weakness</strong> — GDP/headline numbers look acceptable but the median job-seeker's experience is materially worse than the aggregates suggest.</p>
+    <h4>Risk to view</h4>
+    <ul><li><strong>Bear case:</strong> If layoffs accelerate from current levels, or if more workers exit the labor force, net employment could turn negative in the coming months. A tariff shock, rate hike, or corporate earnings disappointment could be the trigger.</li><li><strong>Bull case:</strong> June data may be largely noise. Anomalous declines in restaurant/hotel employment clash with World Cup seasonality expectations, and the 25–34 age cohort employment plunge is statistically unusual. If July data normalizes (especially in leisure/hospitality post-World Cup), the softer readings could be revised away.</li></ul>
+    <h4>What to watch</h4>
+    <ul><li>July payroll report: specifically whether leisure/hospitality rebounds as expected post-World Cup, and whether the 25–34 age cohort employment anomaly reverts.</li><li>Prime-age labor force participation rate: if 83.3% continues falling, discouragement effect is structural, not noise.</li><li>U-6 trajectory - a more reliable read on true labor market slack than headline U-3.</li></ul>
+  `
+},
+{
+  date:`2 Jul`, full:`2 Jul 2026`, tag:`cautious`, tagLabel:`Cautious`,
+  title:`Fed Rate Hikes vs US Equties`,
+  src:``,
+  urls:[{label:`**Stock Market Investors Just Got Bad News From the Federal Reserve. History Says a Big Drop Could Follow.`, url:`https://finance.yahoo.com/markets/stocks/articles/stock-market-investors-just-got-083200169.html`}],
+  body:`
+    <h4>View</h4>
+    <p>Keep a cautious view on US equities, given that the rising 2026 FED rates would drive US stocks into correction following prior tightening pivots</p>
+    <h4>Investment thesis</h4>
+    <p>The key risk is not deteriorating corporate fundamentals, but the potential of <strong>valuation compression</strong> driven by higher interest rates.</p>
+    <h4>What happened</h4>
+    <ul><li>The <strong>S&P 500</strong> has gained approximately <strong>20%</strong> over the past year.</li><li>The <strong>Nasdaq Composite</strong> has advanced roughly <strong>27%</strong>, largely driven by enthusiasm surrounding AI-related stocks.</li><li>In March, no Fed officials projected a rate hike in 2026. Following persistent inflation, the June dot plot now shows:</li><li><strong>50%</strong> of Fed officials expect at least <strong>one rate hike</strong>.</li><li>Around <strong>one-third</strong> expect <strong>two or more rate hikes</strong>.</li><li><strong>Inflation remains sticky</strong></li><li><strong>Several factors continue to support inflation such as tarriffs,</strong> Higher oil prices from Middle East geopolitical risks and strong AI-related investment demand. These factors have reduced expectations for additional rate cuts.</li></ul>
+    <h4>What it implies</h4>
+    <p>First, higher rates can directly compress valuation. Higher interest rates would make discount rates increase accordingly, causing the present value of future cash flow (NPV) to reduce. The lowered NPV then would likely place pressure on equity valuation, reducing stock and deterring investors from buying stocks.</p>
+    <p>If the FED raises rates, financing conditions may gradually tighten. The S&P 500 currently trades around <strong>20.1× forward earnings</strong>, above its 10-year average of <strong>19×</strong>. With valuations already elevated, the market has less room to absorb negative macro surprises. Even modest disappointments in inflation or Fed policy could trigger multiple compression.</p>
+    <p>Second, higher rates would make borrowing cost much higher, raising the cost significantly for finance projects and purchases, as well as reducing customers’ spending and business investment. Therefore, this would slow down the company’s earnings growth and thus, reduce the stock value, as stock is valued based on earnings.</p>
+    <h4>Risk</h4>
+    <h4>Bear view</h4>
+    <p>If inflation rates remain above target, FED is expected to begin a new tightening cycle, causing stock growth to decrease as valuation will be compressed and borrowing cost will be raised. Following the prior correction pattern in the past, raising interest rates have coincided with equity market pullbacks.</p>
+    <h4>Bull case</h4>
+    <p>If inflation cools down faster than expected amid geopolitical pressure and AI demand, the Fed would keep rates unchanged. This way, discount rate pressure declines and NPV would increase accordingly, helping investors regain confidence in buying stocks and grow long-tẻm assets. Under this scenario, the recent concerns would likely to be temporary.</p>
+    <h4>What to watch</h4>
+    <p>Closely watch inflation data, FED announcements.</p>
+    <p>The key debate is no longer whether the U.S. economy remains resilient, but whether inflation will remain persistent enough to force the Fed into a new tightening cycle that compresses equity valuations.</p>
+  `
+},
+{
+  date:`30 Jun`, full:`30 Jun 2026`, tag:`neutral`, tagLabel:`Neutral`,
+  title:`UK Mortgage Rates Frustrate Homebuyers`,
+  src:``,
+  urls:[{label:`Homes harder to sell as high mortgage rates frustrate buyers`, url:`https://finance.yahoo.com/real-estate/articles/homes-harder-sell-high-mortgage-230850889.html`}],
+  body:`
+    <h4>View</h4>
+    <p>Continue to watch the mortgage market worldwide, given that the rising mortgage rates is the result of the geopolitical conflict between the US and Iran, not a structural deterioration in housing fundamentals. The hikes in mortgage rates has driven the house prices in the UK up significantly, deterring potential buyers from purchasing new houses, and sales have inevitably been slowed down; while there are signs of stabilizing as rates have dropped slightly from 5.90% to 5.54%.</p>
+    <h4>Data/ What happened</h4>
+    <p>3 in 5 homes listed for sale since Jan remain on market</p>
+    <p>Agreed sales were 7% down from last year nationally, with the scene varying across the country: -11%YoY in East Midlands, …</p>
+    <p>…….</p>
+    <h4>What it implies</h4>
+    <p>First, this is driven by <strong>demand</strong>, not a collapse in housing fundamentals. The geographic data backs this up: areas with smaller rate-driven cost increases (e.g: North East England +£66/month) saw far less demand erosion than London (+£232/month). Second, it's becoming a <strong>pricing discipline issue</strong> as much as a rate issue: Zoopla notes that correctly-priced homes are still selling, while overpriced listings are stalling. This means part of the "unsold" pool reflects seller behavior (anchoring to outdated price expectations), not just affordability.</p>
+    <h4>Risk (bear case)</h4>
+    <p>If mortgage rates stay elevated or geopolitical risk (Iran - US conflict) escalates, demand suppression could persist beyond Q3, pushing more first-time buyers out of the market permanently.</p>
+    <h4>Bull case</h4>
+    <p>Rates have already eased from 5.90% to 5.54%, and lender competition is increasing (per the article). If this trend continues, demand could return quickly in H2 2026, especially since buyer choice (inventory) is currently higher than a year ago. This is a potential signal for a sharp demand snapback once affordability improves even modestly.</p>
+    <h4>What to watch</h4>
+    <p>Mortgage rate over the next months, particularly whether the 5.5% level breaks lower; whether the unsold-flat overhang clears or grows in Zoopla's next monthly update.</p>
+  `
+},
+{
+  date:`24 Jun`, full:`24 Jun 2026`, tag:`neutral`, tagLabel:`Neutral`,
+  title:`Tech Sell-off as AI Trade Cools`,
+  src:``,
+  urls:null,
+  body:`
+    <p>The sell-off of many tech companies recently does not appear to be driven by a deterioration in the AI market, but by valuation and macro concerns in the market. While the AI market shows positive development, investors are reassessing whether some AI companies can make their growth sustainable, particularly with the incoming IPO of SpaceX, Anthropic,...Investors may soon have a broader range of AI investment opportunities as several high-profile AI companies are expected to go public. Investors now have a wide range of exposure to AI technology today, leading to the fact that these companies have to compete for investors' capital. Compared to in the past, now the investors capital is being teared into smaller parts as more AI companies have turned public. Investor capital may become more dispersed across a larger number of AI-related investment opportunities.  Moreover, AI stock also decreases due to the hawkish decision of Fed to raise the IR as inflation is expected to rise according to some geopolitical events. AI stocks also came under pressure as investors reassessed the possibility of further rate hikes following the Fed's hawkish commentary. This makes investors become more careful, raising the concern about the risk to invest as now, when IR increases, discount rates also increase, the NPV decreases, causing the investors to worry about their potential returns. Higher interest rates tend to compress equity valuations, particularly for high-growth companies whose expected cash flows lie further in the future.  In the end, this does not mean that the AI section is weakened, however, the AI stocks are decreasing due to many combined factors. Investors are selling off not because the market is deteriorating, but because the valuation is not as positive as before, leading to the potential loss in their profit.</p>
+    <p>NOTES:</p>
+    <p>Fundamentals vs Valuation</p>
+    <p>Capital allocation / investor capital flows</p>
+    <p>Fed → rates → valuation</p>
+  `
+},
+{
+  date:`26 Jun`, full:`26 Jun 2026`, tag:`bearish`, tagLabel:`Bearish`,
+  title:`(untitled entry — 26th Jun 2026)`,
+  src:``,
+  urls:null,
+  body:`
+    <p>The stock market today saw a sharp decrease in the prices of some leading stocks like S&P50, Dow Jones,.... This increase is not only driven by the US - Iran conflict, but also by the inflation expectation in the future and FED’s decision to deal with the inflation. While the market seems to have cooled down with the US - Iran peace agreements last week, this market has been heated again when Trump warned Iran of potential additional military action. This decision has made the oil supply unstable with the constraint on the Strait of Hormuz (sai facts vì cái này là dự đoán trong tương lai not facts), Markets are concerned that oil supply could be disrupted.  causing the oil prices to rise. With the increase in crude oil, investors are warned of high inflation expectations with the incoming FED decisions. The high inflation expectation will keep the interest rates high, thus, the stock price will decrease accordingly due to the investors’ fear of instability in the market. VÌ sao rates cao làm giá stock giảm ->  Higher interest rates increase the discount rate applied to future cash flows, placing downward pressure on equity valuations. In short, investors are reassessing the likelihood of further market change. Whether the stock market sees positive signs depends on the FED’s decision after the effects of both released PCE and the US - Iran conflict. The upcoming PCE report will be a critical catalyst, as stronger-than-expected inflation data could reinforce expectations of further monetary tightening, while softer inflation data may ease pressure on the Fed and support equity markets.</p>
+    <p>Revised:</p>
+    <p>US equity futures moved lower as investors weighed renewed geopolitical tensions in the Middle East and prepared for the upcoming PCE inflation report. Market sentiment deteriorated after President Trump warned Iran of potential additional military action, raising concerns about possible disruptions to oil supply through the Strait of Hormuz. As a result, crude oil prices increased, leading investors to reassess inflation expectations.</p>
+    <p>Higher oil prices could contribute to persistent inflationary pressures, increasing the likelihood that the Federal Reserve maintains a higher-for-longer interest-rate stance. Elevated interest rates typically place downward pressure on equity valuations by increasing discount rates and borrowing costs. Consequently, investors have become more cautious toward risk assets.</p>
+    <p>Looking ahead, the PCE report will be closely watched as a key indicator of inflation trends. The market's direction will likely depend on whether inflation shows signs of moderation and how the Federal Reserve responds to both inflation data and ongoing geopolitical developments.</p>
+  `
+},
+{
+  date:`20 Jun`, full:`20 Jun 2026`, tag:`neutral`, tagLabel:`Neutral`,
+  title:`Fed Reduces Forward Guidance`,
+  src:``,
+  urls:null,
+  body:`
+    <p>FED’s decision on keeping the interest rates has raised a heated debate among investors and governors. With the far above 2% target inflation which shows no sign to decrease, FED is expected to get the inflation down by increasing the interest rates. However, Kevin Warsh left many watchers with unanswered questions by not publishing any explanation of this decision. Moreover, FED announces that the Central Bank will also reduce the amount of “forward guidance”, believing that forward guidance to the market will make FED less flexible to react when the market changes too fast. If the FED gives out forward guidance, the market will shift to that way, making some economic indicators change, thus, Some investors have raised concerns that the Fed's independence could come under greater scrutiny given President Trump's public calls for lower interest rates. The FED needs to change its projected decision and it cannot react promptly to the market on time. Some professionals are signaling that the FED seems to be put under political pressure when Trump demands that the interest rates need to decrease. Trump referred Warsh for the Chair position of FED, thus, people are predicting that Warsh and Fed may have to watch Trump’s reaction before taking action. However, Warsh announced that the statement will speak for him itself, and the market is keeping their eyes on Warsh and the FED to explain what they are doing right now, and provide greater transparency regarding their policy framework . From a market perspective, the key issue is not the current level of interest rates but whether a reduction in forward guidance could increase uncertainty around the future path of monetary policy. Less predictable policy communication may result in greater volatility across bond and equity markets.</p>
+  `
+},
+{
+  date:`17 Jun`, full:`17 Jun 2026`, tag:`neutral`, tagLabel:`Neutral`,
+  title:`Fed Holds Rates, Markets Watch Future`,
+  src:``,
+  urls:null,
+  body:`
+    <p>While the decision of FED leaving the interest rates unchanged is expected, markets are focusing on how FED decides on the rates in the future. During the US - Iran peace deal, the inflation has risen sharply as oil supply is constrained in the Strait of Hormuz, causing the oil prices to rise and transportation costs to increase. The upsurged inflation has put a pressure on FED to raise the interest rates to help cool down the market. The US - Iran has become a watershed, as the peace agreement and the reopening of the Strait of Hormuz has raised the public’s positivity on the inflation, inflation is expected to decrease, thus, the pressure on FED is expected to be less. However, what FED is actually questioning is more than that: whether the inflation rates will actually decrease back to 2% or not. The core inflation is still high as whether the interim peace deal between the US and Iran can normalize the oil supply is still uncertain. There are 2 future scenes. First, Warsh- the new president of FED is likely to make a dovish decision to cut the interest rates if the inflation decreases. Secondly, the FED is also likely to make a hawkish decision to raise the interest rates, causing the inflation to decrease. To sum up, whether FED increases or decreases the IR will depend on how the US and Iran deal on the peacement, but in the near future FED is expected to keep the interest rates unchanged.</p>
+    <ul><li>Tech stocks rise if Fed dovish</li><li>Bond yields rise if Fed dovish</li><li>Banks is benefit from higher-for-longer IR</li><li>Growth stocks decline if Fed hawkish</li></ul>
+    <h4>Event → Macro variable → Fed → Asset prices → Sector impact</h4>
+    <p>The spike in inflation has increased pressure on the Fed</p>
+    <p>______________________________________________________________________________________________________</p>
+  `
+},
+{
+  date:`15 Jun`, full:`15 Jun 2026`, tag:`bullish`, tagLabel:`Bullish`,
+  title:`Iran-US Peace Deal / Oil Prices`,
+  src:``,
+  urls:[{label:`Stocks leap worldwide, and oil prices drop after the US and Iran reach a tentative deal on their war`, url:`https://finance.yahoo.com/politics/articles/deal-ending-iran-war-sends-010029568.html`}],
+  body:`
+    <p>The Iran peace agreement represents a classic risk-on catalyst. Lower oil prices reduce inflation expectations, ease pressure on central banks, support consumer spending, and expand equity valuations, particularly for growth and transportation sectors. However, the durability of the rally depends on whether the reopening of the Strait of Hormuz translates into a sustained normalization of global energy supply.</p>
+    <p>The Iran - US peace deal is a classic scene that motivates the economy. Lower oil prices reduce inflation expectations, ease pressure on the central bank (FED) to increase the interest rates and enable the growth of the transportation sector, that are highly dependent on fuel costs, such as transportation and airlines.  While oil prices decrease, stock prices are soaring due to the high expectations of the future. Investors and companies have positive signs of raising revenue when investing. As oil prices decline, stock markets tend to rally because investors become more optimistic about future economic growth and corporate earnings. Lower energy costs can improve business profitability and increase consumer spending, which further supports economic activity.  However, the durability of the situation depends on whether the US and Iran will successfully make a peace agreement deal, and whether the reopening of the Strait of Hormuz can help balance the global energy supply.</p>
+  `
+},
+];
+
+/* ---------------- WATCHLIST DATA ---------------- */
+const watchlistEntries = [
+{
+  date:`1 Aug`, full:`1 Aug 2026`, ticker:`SPCX`, tag:`cautious`, tagLabel:`Cautious`,
+  title:`SpaceX Short Interest Soars Ahead of Big Share Unlock, Earnings`,
+  src:``,
+  urls:[{label:`finance.yahoo.com`, url:`https://finance.yahoo.com/markets/live/stock-market-today-friday-july-31-dow-sp-500-nasdaq-081227738.html`}],
+  body:`
+    <h4>View</h4>
+    <p>Maintain a cautious view on SpaceX’s near-term stock performance. While the company’s long-term fundamentals remain attractive, SpaceX will have to face heavy short selling pressure and the up-coming lock-up expiration in the near time. Therefore, the stock price volatility would remain elevated, making its first earnings report become a catalyst for another stock rally.</p>
+    <p>The key investment question is no longer whether SpaceX is a high-quality company, but whether its first earnings report can offset the selling pressure created by a massive lock-up expiration. If earnings fail to significantly exceed expectations, the increase in tradable shares could weigh on the stock despite strong long-term fundamentals.</p>
+    <h4>What happened</h4>
+    <p>Short interest surged to <strong>219.3 million shares</strong>, equal to <strong>34% of the public float</strong>, up from <strong>23.3 million shares</strong> in mid-June.</p>
+    <p>The value of bearish positions reached <strong>$24.6 billion</strong>, exceeding short bets against Tesla.</p>
+    <p>SpaceX will report its <strong>first quarterly earnings as a public company on August 4</strong>.</p>
+    <p>On <strong>August 6</strong>, approximately <strong>911.5 million locked-up shares</strong> may become eligible for trading.</p>
+    <p>The public float currently represents only <strong>5%</strong> of total shares outstanding, but will increase to roughly <strong>12%</strong> after the first lock-up expiration.</p>
+    <p>The stock is already trading <strong>about 19% below its IPO price</strong>.</p>
+    <h4>What it implies</h4>
+    <p>First, The sharp rise in short interest indicates that many investors expect the lock-up expiration to create substantial selling pressure. Early investors, employees, and insiders who were previously restricted from selling may decide to realize gains or reduce exposure once their shares become tradable. This is basic market function, when lock-up expires, SPaceX’s stock supply would increase and the prices are expected to fall down.</p>
+    <p>Therefore, the first earnings report becomes increasingly important. Because the market expects a large increase in available shares, SpaceX must deliver earnings and forward guidance that materially exceed expectations to absorb the additional selling pressure. Simply meeting expectations may not be sufficient to support the share price. As a result, investors are having a close eye on SpaceX’s first earnings report released on 4th August.</p>
+    <h4>Bear case</h4>
+    <p>If earnings disappoint or management provides cautious guidance, the combination of weaker sentiment and the release of hundreds of millions of additional shares could intensify selling pressure. High short interest may prove justified, resulting in further downside.</p>
+    <h4>Bull case</h4>
+    <p>If earnings significantly beat expectations and management provides strong guidance on Starlink, launch demand, and AI-related businesses, investor demand could absorb much of the new supply. In addition, the unusually high short interest, along with the rising borrowing cost and the shares number available for lending after lock-up expiration could trigger a <strong>short squeeze</strong>, forcing short sellers to buy back shares and accelerating the stock's rebound.</p>
+    <h4>What to watch</h4>
+    <ul><li>SpaceX's first public earnings report (Aug. 4)</li><li>Management guidance on revenue and future growth</li><li>The scale of insider selling after the Aug. 6 lock-up expiration</li><li>Changes in short interest and borrow costs</li><li>Any updates regarding potential S&P 500 inclusion or strategic cooperation with Tesla</li></ul>
+  `
+},
+{
+  date:`29 Jul`, full:`29 Jul 2026`, ticker:`SK Hynix`, tag:`mixed`, tagLabel:`Cautious / Constructive`,
+  title:`Record Profit Misses Investors' Lofty AI Expectations`,
+  src:``,
+  urls:[{label:`finance.yahoo.com`, url:`https://finance.yahoo.com/technology/ai/articles/sk-hynixs-record-profit-misses-investors-lofty-ai-expectations-225142990.html`},{label:`finance.yahoo.com`, url:`https://finance.yahoo.com/markets/article/micron-sk-hynix-stocks-sink-as-ai-chip-sell-off-deepens-125622548.html`}],
+  body:`
+    <p><em>SK Hynix profit increases but fail to meet the expectation, raise concerns of a slowdown in the AI sector. -> fear that AI boom has decelerated.</em></p>
+    <p><em>Nvida circular financing</em></p>
+    <p><em>China state-backed company</em></p>
+    <p><em>Demand fall while supply rises too fast => question the returns on massive capex spending</em></p>
+    <h4>View</h4>
+    <p>Maintain a cautious but constructive on SK Hynix, given that the company’s worse stock performance today does not reflect its deteriorating business fundatmental, but its fail to satisfy the expectation.</p>
+    <h4>Thesis</h4>
+    <p>SK Hynix remains the leading beneficiary of structural AI memory demand through its dominant HBM position. However, the investment thesis is shifting from AI demand expansion toward earnings quality, margins, and execution. The key question is no longer whether AI memory demand exists, but whether SK Hynix can continue delivering earnings growth that exceeds already elevated market expectations.</p>
+    <h4>What happened</h4>
+    <p>Operating profit rose 557% YoY to KRW 60.5 trillion.</p>
+    <p>Revenue reached KRW 79.3 trillion.</p>
+    <p>Both figures missed analyst expectations.</p>
+    <p>Net income surged over 1,200%, largely because of one-off investment gains rather than core operations.</p>
+    <p>SK Hynix also announced multi-year contracts with around 10 customers.</p>
+    <p>Despite record profits, shares continued to decline.</p>
+    <h4>Implications</h4>
+    <p>Although SK Hynix reported record profits, investors focused on the fact that both revenue and operating profit fell short of consensus estimates. This suggests the market is now evaluating the company relative to <strong>future expectations</strong>, not historical performance.</p>
+    <p>SK Hynix has become one of the biggest beneficiaries of the AI boom due to its leadership in HBM. However, after a substantial rally, investors now require evidence that margins, earnings, and guidance can continue to expand fast enough to justify premium valuations.</p>
+    <p>Net income exceeded expectations largely because of <strong>one-time investment gains</strong>, while operating profit missed forecasts. Since operating profit better reflects the company's underlying semiconductor business, investors placed greater weight on the weaker core earnings performance.</p>
+    <p>However, management reiterated that AI memory shortages may persist beyond 2030, supported by continued orders from cloud providers and hyperscalers. Multi-year customer contracts also improve revenue visibility, suggesting the long-term structural demand for HBM remains intact despite short-term valuation concerns.</p>
+    <h4>Risk</h4>
+    <h4>Bear case</h4>
+    <ul><li>AI infrastructure spending slows, with the incoming strong competition from China and the expected low demand on AI compared to the massive spending on AI investment.</li><li>HBM average selling prices continue moderating.</li><li>Margins compress.</li><li>Samsung and Micron narrow the technology gap.</li><li>Investors further reduce valuation multiples.</li></ul>
+    <h4>Bull case</h4>
+    <ul><li>HBM shortages persist.</li><li>Multi-year contracts translate into sustained revenue growth.</li><li>AI capex from Nvidia and hyperscalers remains robust.</li><li>SK Hynix maintains pricing power through its technology leadership.</li></ul>
+    <h4>What to watch</h4>
+    <ul><li>Q3 guidance from management.</li><li>HBM shipment growth and average selling prices.</li><li>Gross margin and operating margin trends.</li><li>AI capex guidance from Nvidia, Microsoft, Amazon, Alphabet, and Meta.</li><li>Competitive developments from Samsung and Micron.</li></ul>
+  `
+},
+{
+  date:`18 Jul`, full:`18 Jul 2026`, ticker:`NFLX`, tag:`cautious`, tagLabel:`Cautious`,
+  title:`'It's in no man's land': What Wall Street is saying about Netflix's big miss`,
+  src:``,
+  urls:[{label:`'It's in no man's land': What Wall Street is saying about Netflix's big miss`, url:`https://finance.yahoo.com/markets/article/its-in-no-mans-land-what-wall-street-is-saying-about-netflixs-big-miss-154355150.html`}],
+  body:`
+    <h4>View</h4>
+    <p>Maintain a cautious view on Netflix, as investors are questioning the company’s long-tẻm growth despite its strong market position in streaming. While the company’s business fundamentals is still profitable, slowing revenue growth has raised a concern among investors that Netflix has gone ex-growth and has no reason for a rally, making investors less willing to pay premium valuation multiples</p>
+    <h4>Investment thesis</h4>
+    <p>Netflix’s investment case is shifting from a high-growth story toward a mature cash-generating business. The key investment question is no longer whether this company can remain profitable or not - it is profitable, but whether it can reaccelerate engagement and revenue growth to justify its premium valuation and reattract investors.</p>
+    <h4>What happened (data)</h4>
+    <ul><li>Netflix reported Q2 earnings.</li><li>Q3 revenue guidance came in below Wall Street expectations.</li><li>Management offered limited optimism regarding future engagement and growth.</li><li>Netflix shares fell sharply after earnings.</li><li>Netflix announced it's cutting its "Watch We Watched" viewership report from twice a year to once a year — investors read this as reduced transparency right as growth questions are mounting</li><li>BofA's Jessica Reif Ehrlich summed up the mood well: nothing bullish, but plenty for the bears to point to</li></ul>
+    <h4>What it implies</h4>
+    <p>First, some investors are no longer viewing Netflix as a pure growth company anymore. Before, this company had high valuation as investors believed in this company’s potential to grow rapidly. Netflix indeed has grown significantly in its market sector, however, its recent weaker revenue growth and limited management guidance has raised concerns among investors on the company’s moderate growth. Without a clear growth catalyst, the stock is stuck in what BofA’s Ehrlich called “no man’s land”, which means that Netflix has no obvious reason for a rally. As a result, this drives the company’s stock much lower as investors are losing patience for Netflix.</p>
+    <p>Second, future upside increasingly depends on finding new growth catalysts rather than maintaining the existing business. Netflix already dominates global streaming, making future subscriber growth naturally more difficult. Consequently, investors are increasingly looking toward additional revenue drivers such as advertising expansion, live sports, paid sharing, or strategic acquisitions. Without meaningful new growth engines, Netflix may continue generating strong cash flow but struggle to regain the premium valuation typically associated with high-growth technology companies.</p>
+    <h4>Risk</h4>
+    <h4>Bear case</h4>
+    <p>If subscriber engagement continues to slow and revenue growth remains below expectations, investors may increasingly classify Netflix as a mature media company rather than a high-growth technology platform. Under this scenario, valuation multiples could compress further despite continued profitability.</p>
+    <h4>Bull Case</h4>
+    <p>If Netflix successfully monetizes its advertising business, expands live sports content, and continues implementing paid-sharing initiatives without materially increasing subscriber churn, revenue growth could reaccelerate. Strong pricing power combined with industry-leading customer retention would support earnings growth and help justify current valuation multiples. Strategic acquisitions that strengthen Netflix's intellectual property portfolio could also provide an additional long-term catalyst.</p>
+    <h4>The wildcard</h4>
+    <p>A possible acquisition. Netflix lost the bidding war for Warner Bros. Discovery to Paramount Skydance back in February, but Comcast's planned spinoff of NBCUniversal (Peacock, Universal Pictures, theme parks) gives Netflix another shot at buying fresh IP — which Ehrlich flagged as a move that could shift investor sentiment.</p>
+    <h4>What to watch</h4>
+    <ul><li>Q3 earnings and revenue growth</li><li>Subscriber additions and engagement trends</li><li>Advertising revenue growth</li><li>Performance of paid sharing initiatives</li><li>Live sports monetization</li><li>Any acquisition activity (e.g., NBCUniversal or other major content assets)</li><li>Future disclosure of user engagement metrics</li><li>Operating margin and free cash flow growth</li></ul>
+    <p>The market is no longer debating whether Netflix is profitable—it clearly is. The debate has shifted to whether Netflix can reignite sustainable growth and convince investors that it deserves to trade as a premium growth company rather than a mature media business.</p>
+  `
+},
+{
+  date:`13 Jul`, full:`13 Jul 2026`, ticker:`SK Hynix`, tag:`bullish`, tagLabel:`Constructive`,
+  title:`SK Hynix sinks after Nasdaq debut amid profit-taking, easing earnings optimism`,
+  src:``,
+  urls:[{label:`SK Hynix sinks after Nasdaq debut amid profit-taking, easing earnings optimism`, url:`https://finance.yahoo.com/markets/stocks/articles/sk-hynix-shares-fall-much-003035107.html`}],
+  body:`
+    <h4>View</h4>
+    <p>Maintain a constructive view on SK Hynix, given that the company’s US IPO was a big success, even though the Korea market has become more cautious. The decline in the Korean-listed shares reflects profit-taking after the successful US IPO and a shift in fundamentals expectation from Korean investors, rather than a deterioration in the business fundamentals.</p>
+    <h4>Investment thesis</h4>
+    <p>SK Hynix remains one of the highest-quality AI infrastructure plays given its leadership in HBM. However, after the successful ADR listing and strong share price appreciation, future upside will increasingly depend on execution and earnings delivery rather than IPO-related optimism. The key question is no longer whether AI memory demand exists, but whether SK Hynix can sustain earnings growth through HBM shipment expansion and maintain its technological lead to justify its premium valuation.</p>
+    <h4>Data</h4>
+    <p>SK Hynix ADRs priced at $149, opened 14% above offer, and closed Friday up 12.8%. Monday in Seoul, the common shares gave back 8.2% as KOSPI fell 2.8%.</p>
+    <p>Although the U.S. IPO raised over <strong>$26 billion</strong>, making it the largest foreign listing in U.S. history, investors in Seoul chose to lock in gains after the listing event concluded.</p>
+    <h4>Implication</h4>
+    <p>First,the decline in Korea-listed shares reflects classic post-event profit-taking after a highly successful U.S. listing.  The Nasdaq listing has been anticipated for months and significantly boosted investors’s optimism in Korea. Therefore, the successful US listing served as the catalyst, making the investors in Korea realize profits rather than increase exposure. Therefore, SK Hynix’s share price in Korea has decreased.</p>
+    <p>Second, Korea’s attention now is shifting from IPO enthusiasm toward the post-IPO earnings execution. Prior to the ADR listing, investors primarily focused on whether SK Hynix could successfully access U.S. capital markets. Now that the listing has been completed, attention has shifted toward operational execution, particularly HBM shipment growth, earnings delivery, and returns on new capacity investments. Korean investors now focus on whether SK Hynix can utilize the capital raised in the US IPO to make meaningful revenue and improve its cash flow. Therefore, the slower than expected HBM4 shipment growth has raised concerns among investors on the company’s capacity. Now the investment question has changed from valuation-driven toward earnings - driven, SK Hynix’s mission is to generate sufficient earnings to justify its premium valuation, rather than just earn revenue.</p>
+    <p>Third, SK Hynix is more reliant on the HBM market rather than its rivals - Samsung and Micron, raising considerations among investors, especially with the recent price increase in DRAM. This increase would provide relatively greater earnings support for Samsung and Micron, whose product portfolios are more diversified. SK Hynix therefore has fewer alternative earnings drivers outside HBM, making its quarterly earnings more sensitive to HBM shipment growth.</p>
+    <h4>Risk</h4>
+    <h4>Bear case</h4>
+    <p>If HBM4 production ramps up more slowly than expected or hyperscaler AI infrastructure spending begins to moderate, investors may question whether current earnings expectations are too optimistic.</p>
+    <p>At the same time, if Samsung and Micron successfully narrow the technology gap through capacity expansion and product improvements, competitive pressure could reduce SK Hynix's pricing power and market share over time.</p>
+    <p>Given the stock's strong performance over the past year, even small earnings disappointments could trigger further valuation compression</p>
+    <h4>Bull case</h4>
+    <p>If second-quarter earnings demonstrate accelerating HBM shipments and management provides confident guidance on future AI memory demand, the recent sell-off may prove to be nothing more than short-term profit-taking.</p>
+    <p>Continued AI infrastructure investment by Nvidia, Microsoft, Amazon, Google and other hyperscalers would reinforce structural demand for HBM, allowing SK Hynix to maintain both pricing power and strong profitability.</p>
+    <h4>What to watch</h4>
+    <ul><li>Hyperscalers and chipmakers’ guidance regarding AI memory demand and capacity expansion</li><li>Hyperscalers AI capex</li><li>HBM shipment of SK Hynix</li><li>Competitive development from Samsung and Micron’s expansion.</li><li>SK Hynix’s Q2 earnings</li></ul>
+  `
+},
+{
+  date:`10 Jul`, full:`10 Jul 2026`, ticker:`SK Hynix`, tag:`bullish`, tagLabel:`Constructive`,
+  title:`SK Hynix to price US IPO at $149 per depository share: Report`,
+  src:``,
+  urls:[{label:`SK Hynix to price US IPO at $149 per depository share: Report`, url:`https://finance.yahoo.com/technology/article/sk-hynix-to-price-us-ipo-at-149-per-depository-share-report-193700352.html`}],
+  body:`
+    <h4>View</h4>
+    <p>Maintain a constructive view on SK Hynix and the AI memory industry, supported by the strong structural demand in AI chips amid the AI infrastructure expansion. However, investors should remain cautious as the memory industry has already experienced cyclical downfall periods.</p>
+    <h4>Thesis</h4>
+    <p>SK Hynix’s high IPO reflects the market’s high interest in the AI memory sector along with the shortage of AI memory chips, especially high-bandwidth memory HBM used in AI data centers. Thus, the key investment question is now not whether AI memory demand exists, but whether the future earnings growth of SK Hynix can justify its high current valuations.</p>
+    <h4>What happened</h4>
+    <ul><li>SK Hynix is now one of the only 3 memory chip manufacturers that make HBM storage chips - the high demand memory chips hold the most important data needed to run a piece of software. This company hold ~ 56.4% market share in HBM</li><li>SK Hynix set the prices for its ADS shares at 149$ each</li><li>The IPO of SK Hynix consists of 177.9 Million ADS, with the company hoping to raise $28 billion</li><li>This stock has surged 174% over the past 6 months, and 636% in the past year.</li><li>The demand for the US sale is reported to run at 7 times the available shares, making its one off the largest foreign listing</li></ul>
+    <h4>What it implies</h4>
+    <p>Strong IPO demand has confirmed that investors are having high expectations on long term AI memory growth. Indeed, demand for HBM remains exceptionally strong as hyperscalers continue expanding AI data centers. Since Nvidia’s GPUs require HBM to achieve maximum computing performance, SK Hynix is positioned at one of the most critical points of the AI supply chain. The proceeds from the IPO will allow the company to accelerate capacity expansion to meet this structural demand. If this additional capacity can be turned into sustained revenue growth amid the strong demand, investors will gain even more confidence in the company’s long term performance, supporting a higher valuation over time.</p>
+    <p>Second, the U.S. listing significantly would broaden SK Hynix’s investor base. American institutional investors, mutual funds, pension funds, and ETFs can now gain direct exposure to this major semiconductor company through the Nasdaq-listed shares instead of purchasing SK Hynix shares on the Korean market. This should improve trading liquidity and potentially increase long-term institutional ownership. Although this doesnt change the company’s intrisic value and earnings power, higher demand of shares from global investors can provide short term support for the share prices of SK Hynix, raising the company’s worthiness among investors.</p>
+    <p>However, whether SK Hynix can justify its high current valuation now does not solely depend on strong AI memory chip demand. Instead, investors are now looking for evidence whether SK Hynix can turn this demand into sustainable revenue and whether this semiconductor company can utilize capital raised from IPO to expand its manufacturing capacity and generate attractive returns.</p>
+    <h4>Risk</h4>
+    <h4>Bear Case</h4>
+    <p>The potential issue of SK Synix is the risk of overcapacity after aggressive investment. If SK Hynix invests too aggressively on chip manufacturing capacity expansion while AI demands cool down, there will be an oversupply, making the memory chips prices decline. Therefore, the company’s earnings will also be likely to decrease, causing a valuation compression to happen and deferring investors from willing to invest in SK Hynix. This would create another memory downturn similar to previous cycles in the AI sector.</p>
+    <p>Moreover, competition from Samsung and Micron remains one of the key long-tẻm risk for SK Hynix. While SK Hynix currently leads the HBM market with ~ 56.4% market share, continued capacity expansion and technological improvements from its peers - Samsung and Micron - could also erode SK Hynix’s advantage. Increased multiple sources of HBM chip supply may reduce SK Hynix’s pricing power, leading to the slower revenue growth. Moreover, if the AI chips supply expands faster than AI demand, the current memory shortage can turn into oversupply, triggering volatility in SK Hynix’s stock prices as well as the company’s profitability.</p>
+    <h4>Bull Case</h4>
+    <p>If AI demand continues exceeding supply when hyperscalers keep spending more AI capex, SK Hynix can still maintain its technology leadership and pricing power. Strong execution on capacity expansion together with sustained AI demand would support revenue growth, margin expansion, and ultimately justify the company's premium valuation over tim<strong>e.</strong></p>
+    <p>Near-term upside appears more limited as much of the positive outlook is already reflected in the share price. As a result, future share price performance will increasingly depend on the company's ability to exceed already-high expectations, rather than simply delivering strong earnings.</p>
+    <h4>What to watch</h4>
+    <ul><li>SK Hynix revenue report</li><li>NVidia and other hyperscaler AI spending because they drive AI demand</li><li>Memory chips supply expansion of SK Hynix, Micron and Samsung</li></ul>
+  `
+},
+{
+  date:`7 Jul`, full:`7 Jul 2026`, ticker:`SPCX`, tag:`bullish`, tagLabel:`Constructive`,
+  title:`What to expect when SpaceX joins Nasdaq100 — Here's How Much SpaceX Stock Is Expected To Move This Week`,
+  src:``,
+  urls:[{label:`Here’s How Much SpaceX Stock Is Expected To Move This Week`, url:`https://www.investopedia.com/spacex-is-about-to-join-the-nasdaq-100-here-s-how-much-the-stock-is-expected-to-move-this-week-spcx-12010845`}],
+  body:`
+    <h4>View</h4>
+    <p>Maintain a constructive view on SpaceX, given that the Nasdaq100 inclusion reflects a potential change in SpaceX’s stock demand rather than a change in business fundamentals.</p>
+    <h4>Investment thesis</h4>
+    <p>Nasdaq100 inclusion is likely to generate short-term support to the stock demand and price through passive fund inflows, however, the long-term performance will depend on whether SpaceX can sustain its valuation through revenue growth and cash-flow across the AI sector to satisfy investors.</p>
+    <h4>What happened</h4>
+    <ul><li>SpaceX will join Nasdaq100 before Tuesday's market open</li><li>SpaceX stock price has been volatile since its opening. Now the price reaches 162$ - above its opening price but 20% down from its peak</li><li>Current options suggests a 8% swing in stock price this week</li></ul>
+    <h4>What it implies</h4>
+    <ul><li>The Nasdaq100 inclusion would generate more passive buyings for SpaceX stock, as joining an index means funds that track this index would have to buy the company’s shares. In the short-term, this would create additional demand for SpaceX stock, making the stock prices increase and improve SpaceX’s trading liquidity. However, Index inclusion does not alter the company's intrinsic value because it has no direct impact on revenue, earnings, or free cash flow generation. Therefore, the long-term stock performance of SpaceX will depend on its ability to raise meaningful revenue to justify its premium</li><li>Moreover, Nasdaq 100 inclusion should broaden SpaceX's shareholder base by increasing ownership among passive ETFs, pension funds, index funds, and quantitative investors from mostly investors. This shift may help reduce volatility over the longer term, easing the investors’ concerns over the stock volatility off SpaceX</li><li>Investors are still watching SpaceX’s performance to reassess the company’s valuation. This suggests that investors’ interest is now shifting from high expectations in IPO to a more disciplined assessment of revenue growth, cash flow and its fundamentals. The question now has shifted to whether SpaceX can generate enough earnings to justify its valuation, not just basically make profit as before.</li></ul>
+    <h4>Risk</h4>
+    <p>Bull case:</p>
+    <ul><li>The Nasdaq100 inclusion would increase SpaceX stock buying, improving the company’s trading liquidity</li><li>If SpaceX can utilize capital effectively to accelerate revenue growth to justify its high valuation, investors will gain more confidence in buying SpaceX’s stock.</li></ul>
+    <h4>Bear Case</h4>
+    <ul><li>The Nasdaq100 can only produce a temporary buying effect, so the valuation concerns continue to exist among investors. If earnings fail to support current expectations in valuation, SpaceX would face more volatility in its stock performance, deterring additional investors from trading this stock post-index inclusion.</li></ul>
+    <h4>What to watch</h4>
+    <ul><li>The inflows from EFTS and passive funds during Nasdaq100 inclusion</li><li>Upcoming earnings of SpaceX, including revenue growth and free cash flow relative to current valuation.</li><li>Whether post-index inclusion trading stabilizes or whether elevated volatility persists following the completion of passive fund rebalancing.</li></ul>
+    <h4>Inclusion</h4>
+    <p>Investors are now evaluating whether SpaceX can convert its leadership in space technology, Starlink, and AI infrastructure into earnings and cash flows sufficient to justify its premium valuation. Consequently, while index inclusion may support the stock in the near term, its longer-term performance will ultimately depend on execution rather than passive buying alone.</p>
+  `
+},
+{
+  date:`4 Jul`, full:`4 Jul 2026`, ticker:`1024.HK`, tag:`bullish`, tagLabel:`Constructive`,
+  title:`Alibaba, Tencent back Kuaishou's Kling AI in $2.8 billion fundraise`,
+  src:``,
+  urls:[{label:`Alibaba, Tencent back Kuaishou's Kling AI in $2.8 billion fundraise`, url:`https://finance.yahoo.com/technology/ai/articles/alibaba-tencent-back-kuaishous-kling-093538982.html`}],
+  body:`
+    <h4>View</h4>
+    <p>Maintain a constructive view on Kuaishou, as the Kling AI’s fundraising validates the company’s AI asset value and its position in the China AI sector. While Kuaishou’s ownership will be diluted, this company still manages to raise significant revenue, implying high expectations among investors.</p>
+    <h4>Investment Thesis</h4>
+    <p>The key takeaway is not the ownership dilution of Kuaishou, but the market validation of King AI’s validation, monetization potential and position in the AI sector.</p>
+    <h4>What happened/ data</h4>
+    <p>Kling AI raised over 19B yuan (2.8B USD) from 3 investors: alibaba, tencent, baidu at a 15B USD pre-money valuation, together this company have a post-money valuation of roughly 17.8B USD</p>
+    <p>Following the capital raise, Kuaishou’s ownership on KingAI will decline from 100% to 68%.</p>
+    <p>Kling AI generate high revenue of 650M yuan in Q1 2026 - up to more than x4 YoY growth, highlighting a strong monetization from AI sector.</p>
+    <h4>What it implies</h4>
+    <p>First, the co-investment of Alibaba, Tencent and Baidu is proof of Kling Ai’s effective strategic value. While these 3 companies are direct competitors in the AI sector, they are willing to take minority stakes in Kling Ai rather than compete with each other. This suggests that they believe Kling Ai is the potential leader of the Ai sector worth investing in. This events has raised enthusiasm of the market in the AI sector in China, giving Kling AI more pressure to justify market’s expectation and valuation in the future.</p>
+    <p>Second, Kling AI’s revenue has already hit 650M yuan in Q1 - a significant number that x4 YoY growth against a 15B pre-money valuation. This revenue is consistent with how the market is pricing high-growth AI - related assets globally. But the real question is whether this revenue growth is sustainable to justify this company’s high valuation as more competition intensifies in the Ai sector.</p>
+    <p>Third, though Kuaishou’s ownership is diluted from 100% to 68%, this company and the market shouldn't view this negatively.  After raising fundraising, the company will receive new capital that can be deployed to accelerate product development, Ai model training, investment,... This helps Kuaishou to be more flexible in the financial decision making process in investing. This would accordingly increase the likelihood that Kling Ai can make more revenue and sustain its rapid revenue growth. If the additional capital generates returns above the company’s cost of capital, the remaining 68% stake could become more valuable than owing 100% of a slow growing business.</p>
+    <h4>Risk</h4>
+    <h4>Bear case</h4>
+    <p>If monetization slows down, Kling AI’s revenue would also decline and fail to justify the company’s high valuation of 15B USD. This will lead to valuation compression, as the company will have difficulty in turning investment to free cash flow. Moreover, with the coming of both domestic and international AI company, the competition will be intensified more, with the dilution of Kuaishuo’s ownership, Kling AI will face much pressure in justify its own value and attract investors’ interest again.</p>
+    <h4>Bull case</h4>
+    <p>If Kling AI can utilize capital from investors to upgrade its products and accelerate its revenue, this company can justify its potential and position in the market, validating the 15B USD valuation. This would set the stage for a IPO at a higher multiple, creating value for Kuaishou parent.</p>
+    <h4>What to watch</h4>
+    <ul><li>Kling AI’ revenue to see whether its revenue keeps accelerating or decline</li><li>Kling AI upcoming upgrade</li><li>Management's capital allocation and return on the newly raised funds.</li></ul>
+  `
+},
+{
+  date:`1 Jul`, full:`1 Jul 2026`, ticker:`NVDA`, tag:`bullish`, tagLabel:`Constructive`,
+  title:`Nvidia stock is sagging. Here's what's behind the negative short-term trend.`,
+  src:``,
+  urls:[{label:`Nvidia stock is sagging. Here's what's behind the negative short-term trend.`, url:`https://finance.yahoo.com/markets/stocks/article/nvidia-stock-is-sagging-heres-whats-behind-the-negative-short-term-trend-120447121.html`}],
+  body:`
+    <h4>View</h4>
+    <p>Maintain a constructive long-term view on Nvidia, given that the recent underperformance of Nvidia reflects the market’s institutional sector rotation and macro headwinds rather than the company’s change in underlying business fundamentals.</p>
+    <h4>Investment thesis</h4>
+    <p>Nvidia is facing a <strong>valuation correction, not a fundamental deterioration.</strong></p>
+    <h4>What happened</h4>
+    <p>Nvidia shares have now underperformed the S&P 500 for 6 straight days - longest stretch since september 2025</p>
+    <p>Nvidia hit an all time high closing price of 235 on May 14, but the stock has pulled back by 23% since then.</p>
+    <p>Performance has been mixed across Q2 overall, despite the earlier ATH.</p>
+    <p>Institutional rotation is underway: capital moving <strong>out of</strong> AI hardware (Nvidia) and <strong>into</strong> memory chips</p>
+    <p>Big Tech projected capex of >$700 billion in 2026 and Wall Street is growing impatient waiting for ROI evidence.</p>
+    <p>Additional macro headwind: Fed rate hike concerns later this year would raise the cost of financing AI projects, putting further pressure on hyperscaler capex appetite.</p>
+    <h4>What it implies</h4>
+    <p>First, this is the market’s <strong>rotation within the AI trade</strong>, not an exit from AI. Capital moving from Nvidia into memory chips signals investors are repositioning along the AI value chain.</p>
+    <p>Second, investors are reassessing hyperscaler ROI when they are spending capex on AI. In particular, NVIDIA’s revenue is directly tied to hyperscaler capex. Hyperscalers spend heavy capex -> Wall Street questions ROI -> hyperscalers may be pressured to cut future capex -> Nvidia's forward revenue estimates fall -> Nvidia stock gets re-rated lower.  This may cause uncertainty around Nvidia’s future growth, discouraging investors from buying this stock. Also, If Wall Street’s impatience with 700$B in Big Tech capital expenditure intensifies, the first stock to feel the pressure is NVIDIA</p>
+    <p>Third, FED expected hiked rates also affects Nvidia’s stock prices. If FED raises the rates, discount rates would increase, followed by the decline in NVIDIA’s NPV. The low NPV would put much pressure on NVIDIA’s valuation at the moment, making investors to concerned when purchasing this company stock. Again, this a valuation issue rather than a business issue.</p>
+    <h4>Risk</h4>
+    <h4>Bear Case</h4>
+    <p>If the FED hikes rates in H2 2026, the cost of AI financing projects would also rise and the company’s valuation may decline. If hyperscalers fail to demonstrate attractive returns on AI investments, investors may begin questioning the sustainability of future GPU demand.</p>
+    <h4>Bull Case</h4>
+    <p>If hyperscaler earnings in the next few months show positive expansion relative to the the capex and AI monetization accelerates, the recent correction would likely be viewed as temporary and as a healthy valuation reset, encouraging investors to believe in the company stocks’ potential returns. Then, market will reprice NVIDIA’s stock prices.</p>
+    <h4>What to watch</h4>
+    <p>Hyperscaler earnings season in a few weeks, where strong earnings relative to reasonable capex plans would renewed the market’s interest in NVIDIA in the near term.</p>
+    <p>FED’s announcement on rate path in July meeting would be a market signal for NVIDIA’s valuation.</p>
+  `
+},
+{
+  date:`29 Jun`, full:`29 Jun 2026`, ticker:`MSFT`, tag:`neutral`, tagLabel:`Neutral`,
+  title:`Microsoft's Worst Month Since 2000: Why Is This Happening?`,
+  src:``,
+  urls:[{label:`Microsoft’s Worst Month Since 2000: Why Is This Happening?`, url:`https://finance.yahoo.com/markets/stocks/articles/microsoft-worst-month-since-2000-220113071.html`}],
+  body:`
+    <h4>View</h4>
+    <p>Continue to keep eyes on Microsoft stocks, given that the 35% down on the stock prices reflects the company’s change in capital allocation to capex, not a deterioration in the business fundamentals. Revenue and EPS remain strong, but rising AI infrastructure spend is compressing free cash flow and shareholder returns in the near term.</p>
+    <h4>What Happened?</h4>
+    <p>Shares of Microsoft are down more than 20% in June 2026 - the steepest monthly decline of this company since 2000, making the stock down more than 35% since the start of 2026. Moreover, Microsoft’s market cap decreased significantly from $4T to around $2.6T today</p>
+    <p>However, revenue has always grown for 8 consecutive quarters, with estimated earnings always standing at the top of Wall Street Microsoft has beaten Wall Street earnings expectations for eight consecutive quarters.</p>
+    <p>In 2026, Microsoft is reported to spend more capex on AI infrastructure, estimated to reach $190B in 2026 by Bank of America. Hyperscaler capex has climbed from 70% of operating cash flow in 2025 to nearly 100% in 2026.</p>
+    <p>Capital has increasingly shifted from hyperscalers toward AI infrastructure suppliers, with the semiconductor ETF (SOXX) is up 94% YTD, while the Magnificent Seven ETF is down roughly 6% Microsoft không allocate capital vào software.</p>
+    <h4>What it implies</h4>
+    <p>Firstly, Microsoft has spent more money on capex, putting more pressure on the company’s margin (vì làm FCF giảm-> operating margin giảm). The increasing capex money has made the free cash flow of Microsoft become limited. Declining free cash flow has directly constrained the company to buy back or declare dividends for shareholders, making investors less enthusiastic to buy Microsoft’s shares even though the company has made significant profit in the AI technology sector.</p>
+    <p>Secondly, the market has now shifted from valuing Microsoft on its current earnings to its capex allocation for AI capacity. This is simply a re-rating, not a worse change in business quality.</p>
+    <p>The market has shifted its focus from Microsoft's near-term earnings to the scale and expected returns of its AI-related capital investment.</p>
+    <h4>Risk</h4>
+    <h4>Bear case</h4>
+    <p>If capex keeps rising in the future while revenue cannot increase accordingly as significantly as capex, Microsoft will be facing pressure on margin, raising concerns in the market on ROI of the company. This may, indeed, deter investors from buying Microsoft shares, as the capacity of buyback/ dividends of this company is now low due to the limited free cash flow after putting more money on capex. If AI-related investment fails to generate sufficient returns, investors may increasingly question whether Microsoft's capital allocation strategy is creating long-term shareholder value.</p>
+    <h4>Bull case</h4>
+    <p>However, if the revenue growth can outpace capex growth, the situation can reverse quickly. Free cash flow of Microsoft will increase, allowing this company to allocate cash more freely.</p>
+    <h4>What to watch</h4>
+    <p>Now, Maintain a constructive view on Microsoft despite the recent sell-off. The market is keeping eyes on Microsoft’s next move. The question arises now is whether this capex is overinvested or not, and whether the company’s AI revenue growth rate is relative to the capex growth in the future.</p>
+  `
+},
+{
+  date:`26 Jun`, full:`26 Jun 2026`, ticker:`AAPL`, tag:`cautious`, tagLabel:`Cautious`,
+  title:`Apple`,
+  src:``,
+  urls:null,
+  body:`
+    <p>Apple is no longer immune to the rising memory costs.  The shortage of core memory and storage has put much pressure on this company to raise the prices on its own products, causing the consumption demand to deep dive and the profit to decrease potentially. This risk has raised concerns among investors, deterring them to buy more stocks of Apple making investors more cautious toward Apple stock. Therefore, the company’s stock prices also plunged in the global stock market.  Many tech companies such as Microsoft, Sony, Nintendo… are also dealing with this problem of memory. Likewise, Apple claims that the rise in its products’ prices is unavoidable if this company wants to manage profit when increased margin pressure is facing them. Apple faces a difficult trade-off between protecting margins and maintaining affordability. This situation has put Apple in a hard position, since Apple has no way to both raise the products' prices to maintain profit and to ensure investors 'concerns. Now this is not simply a play, no one can anticipate when the memory shortage will end, and how this crisis will affect some tech companies such as Apple. Therefore, Apple might need to limit its dependence on memory and diversify its supplier base</p>
+  `
+},
+{
+  date:`25 Jun`, full:`25 Jun 2026`, ticker:`SPCX`, tag:`neutral`, tagLabel:`Neutral`,
+  title:`SpaceX`,
+  src:``,
+  urls:null,
+  body:`
+    <p>The debt offering of SpaceX does not signal the company’s problem; the real problem is whether the company’s future earnings can justify its high valuation and the market’s future expectation. Strong investor demand allowed SpaceX to increase the size of the offering from $20 billion to $25 billion. Many people are questioning if SpaceX is dealing with any financial distress after making M&A deals with Cursors,.... However, this move is primarily intended to refinance the company and to cover any existing bridge loan. Although the stock prices of SpaceX have decreased (shares have pulled back from its post-IPO highs) and its market cap value has dived slightly after its extraordinary IPO, the market’s demand still remains robust, making SpaceX have to offer $25M bonds. Investors are still having high interest in SpaceX and are keeping their eyes closely on SpaceX’s future performance, as the key question is not whether SpaceX can get capital or not, but whether its revenue and cash-flow growth in the future can justify its current high valuation.</p>
+    <p>Revised Conclusion:</p>
+    <p>The strong response from institutional investors suggests continued confidence in SpaceX's long-term growth prospects and credit profile. At the same time, the company's stock has retreated from its post-IPO highs, leading some investors to reassess its valuation. The key debate is not whether SpaceX can access capital, but whether its future revenue growth and cash-flow generation can justify its current market capitalization. While recent share price weakness reflects valuation concerns, robust demand for both the company's equity and debt indicate that investor interest in SpaceX remains strong.</p>
+  `
+},
+{
+  date:`16 Jun`, full:`16 Jun 2026`, ticker:`SPCX`, tag:`bullish`, tagLabel:`Constructive`,
+  title:`SpaceX stock jumps for second day, now up over 40% since debut`,
+  src:``,
+  urls:[{label:`*SpaceX stock jumps for second day, now up over 40% since debut*`, url:`https://finance.yahoo.com/markets/stocks/article/spacex-stock-jumps-for-second-day-now-up-over-40-since-debut-143317176.html`}],
+  body:`
+    <p>SpaceX shares have risen sharply due to various factors: demand theory supply and demand dynamics, scarcity value, investors’ expectation and SpaceX’s premium position in the technology stock sector. During an IPO when only a small portion of shares are offered, the limited supply of publicly tradable shares was insufficient to meet strong investor demand, creating a shortage of SpaceX stock in the market. At IPO, only a fraction of shares is floated; the resulting supply constraint, combined with intense investor demand, drove the initial price surge. Therefore, the price surged. Moreover, investors’ expectations on SpaceX are high, alongside their premium position among other tech companies. Investors seeking exposure to space economy or satellite technology have very limited alternatives, thus, when SpaceX first became public, investors are increasingly becoming interested investors showed strong interest in the company. Yet the durability of this premium is far from assured However, whether this upsurge in price can be maintained in the future depends on the future depends on the company's ability to sustain its growth and justify its valuation. In the future, when the lock up period expires, insiders and early investors will be allowed to sell shares, this would make the share supply increase, therefore, the price can decrease which may place downward pressure on the stock price.</p>
+  `
+},
+];
+
+/* ---------------- RENDER ENTRIES ---------------- */
+const container = document.getElementById('entries');
+entries.forEach((e,i)=>{
+  const det = document.createElement('details');
+  det.className = 'entry';
+  if(i===0) det.setAttribute('open','');
+  det.innerHTML = `
+    <summary>
+      <span class="date-chip">${e.date}</span>
+      <span class="entry-title">${e.title}</span>
+      <span class="tag tag-${e.tag}">${e.tagLabel}</span>
+      <span class="chevron">&#9656;</span>
+    </summary>
+    <div class="entry-body">
+      <span class="src">${srcHTML(e)}</span>
+      ${e.body}
+    </div>
+  `;
+  container.appendChild(det);
+});
+
+/* ---------------- RENDER WATCHLIST ---------------- */
+const watchContainer = document.getElementById('watchEntries');
+function renderWatchlist(filter){
+  watchContainer.innerHTML = '';
+  watchlistEntries
+    .filter(e => filter === 'all' || e.ticker === filter)
+    .forEach((e,i)=>{
+      const det = document.createElement('details');
+      det.className = 'entry';
+      if(i===0) det.setAttribute('open','');
+      det.innerHTML = `
+        <summary>
+          <span class="date-chip">${e.date}</span>
+          <span class="ticker-chip">${e.ticker}</span>
+          <span class="entry-title">${e.title}</span>
+          <span class="tag tag-${e.tag}">${e.tagLabel}</span>
+          <span class="chevron">&#9656;</span>
+        </summary>
+        <div class="entry-body">
+          <span class="src">${srcHTML(e)}</span>
+          ${e.body}
+        </div>
+      `;
+      watchContainer.appendChild(det);
+    });
+}
+const tickers = ['all', ...new Set(watchlistEntries.map(e=>e.ticker))];
+const filterBar = document.getElementById('tickerFilter');
+tickers.forEach(t=>{
+  const b = document.createElement('button');
+  b.textContent = t === 'all' ? `All (${watchlistEntries.length})` : t;
+  if(t==='all') b.classList.add('active');
+  b.addEventListener('click',()=>{
+    filterBar.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    renderWatchlist(t);
+  });
+  filterBar.appendChild(b);
+});
+renderWatchlist('all');
+
+/* ---------------- DEAL TRACKER DATA ---------------- */
+const dealEntries = [
+{
+  date:`10 Jul`, full:`10 Jul 2026`, dealType:`IPO`, tag:`bullish`, tagLabel:`Constructive`,
+  title:`SK Hynix to price US IPO at $149 per depository share: Report`,
+  src:``,
+  urls:[{label:`SK Hynix to price US IPO at $149 per depository share: Report`, url:`https://finance.yahoo.com/technology/article/sk-hynix-to-price-us-ipo-at-149-per-depository-share-report-193700352.html`}],
+  tableHeader:null,
+  tableRow:[`10th July 2026`,`SK Hynix IPO`,`AI, Valuation,..`,`SKNY`],
+  body:`
+    <h4>View</h4>
+    <p>Maintain a constructive view on SK Hynix and the AI memory industry, supported by the strong structural demand in AI chips amid the AI infrastructure expansion. However, investors should remain cautious as the memory industry has already experienced cyclical downfall periods.</p>
+    <h4>Thesis</h4>
+    <p>SK Hynix’s high IPO reflects the market’s high interest in the AI memory sector along with the shortage of AI memory chips, especially high-bandwidth memory HBM used in AI data centers. Thus, the key investment question is now not whether AI memory demand exists, but whether the future earnings growth of SK Hynix can justify its high current valuations.</p>
+    <h4>What happened</h4>
+    <ul><li>SK Hynix is now one of the only 3 memory chip manufacturers that make HBM storage chips - the high demand memory chips hold the most important data needed to run a piece of software. This company hold ~ 56.4% market share in HBM (vdu: SSD -> HBM (SK Hynix) -> GPU (Nvidia) nên GPU phụ thuộc vào HBM)</li><li>SK Hynix set the prices for its ADS shares at 149$ each</li><li>The IPO of SK Hynix consists of 177.9 Million ADS, with the company hoping to raise $28 billion</li><li>This stock has surged 174% over the past 6 months, and 636% in the past year.</li><li>The demand for the US sale is reported to run at 7 times the available shares, making its one off the largest foreign listing</li></ul>
+    <h4>What it implies</h4>
+    <p>Strong IPO demand has confirmed that investors are having high expectations on long term AI memory growth. Indeed, demand for HBM remains exceptionally strong as hyperscalers continue expanding AI data centers. Since Nvidia’s GPUs require HBM to achieve maximum computing performance, SK Hynix is positioned at one of the most critical points of the AI supply chain. The proceeds from the IPO will allow the company to accelerate capacity expansion to meet this structural demand. If this additional capacity can be turned into sustained revenue growth amid the strong demand, investors will gain even more confidence in the company’s long term performance, supporting a higher valuation over time.</p>
+    <p>Second, the U.S. listing significantly would broaden SK Hynix’s investor base. American institutional investors, mutual funds, pension funds, and ETFs can now gain direct exposure to this major semiconductor company through the Nasdaq-listed shares instead of purchasing SK Hynix shares on the Korean market. This should improve trading liquidity and potentially increase long-term institutional ownership. Although this doesnt change the company’s intrisic value and earnings power, higher demand of shares from global investors can provide short term support for the share prices of SK Hynix, raising the company’s worthiness among investors.</p>
+    <p>However, whether SK Hynix can justify its high current valuation now does not solely depend on strong AI memory chip demand. Instead, investors are now looking for evidence whether SK Hynix can turn this demand into sustainable revenue and whether this semiconductor company can utilize capital raised from IPO to expand its manufacturing capacity and generate attractive returns.</p>
+    <h4>Risk</h4>
+    <h4>Bear Case</h4>
+    <p>The potential issue of SK Synix is the risk of overcapacity after aggressive investment. If SK Hynix invests too aggressively on chip manufacturing capacity expansion while AI demands cool down, there will be an oversupply, making the memory chips prices decline. Therefore, the company’s earnings will also be likely to decrease, causing a valuation compression to happen and deferring investors from willing to invest in SK Hynix. This would create another memory downturn similar to previous cycles in the AI sector.</p>
+    <p>Moreover, competition from Samsung and Micron remains one of the key long-tẻm risk for SK Hynix. While SK Hynix currently leads the HBM market with ~ 56.4% market share, continued capacity expansion and technological improvements from its peers - Samsung and Micron - could also erode SK Hynix’s advantage. Increased multiple sources of HBM chip supply may reduce SK Hynix’s pricing power, leading to the slower revenue growth. Moreover, if the AI chips supply expands faster than AI demand, the current memory shortage can turn into oversupply, triggering volatility in SK Hynix’s stock prices as well as the company’s profitability.</p>
+    <h4>Bull Case</h4>
+    <p>If AI demand continues exceeding supply when hyperscalers keep spending more AI capex, SK Hynix can still maintain its technology leadership and pricing power. Strong execution on capacity expansion together with sustained AI demand would support revenue growth, margin expansion, and ultimately justify the company's premium valuation over tim<strong>e.</strong></p>
+    <p>Near-term upside appears more limited as much of the positive outlook is already reflected in the share price. As a result, future share price performance will increasingly depend on the company's ability to exceed already-high expectations, rather than simply delivering strong earnings.</p>
+    <h4>What to watch</h4>
+    <ul><li>SK Hynix revenue report</li><li>NVidia and other hyperscaler AI spending because they drive AI demand</li><li>Memory chips supply expansion of SK Hynix, Micron and Samsung</li></ul>
+  `
+},
+{
+  date:`27 Jun`, full:`27 Jun 2026`, dealType:`IPO Delay`, tag:`cautious`, tagLabel:`Cautious`,
+  title:`AI trade hits a wall amid report that OpenAI will delay IPO until 2027`,
+  src:``,
+  urls:[{label:`AI trade hits a wall amid report that OpenAI will delay IPO until 2027`, url:`https://finance.yahoo.com/technology/article/ai-trade-hits-a-wall-amid-report-that-openai-will-delay-ipo-until-2027-150642366.html`}],
+  tableHeader:null,
+  tableRow:[`06/27/2026`,`OpenAI IPO delay`,`OpenAI (private, latest valuation ~$852B)`,`Targeting a $1T valuation before IPO`],
+  body:`
+    <p>Despite strong fundamentals demonstrated by Micron's earnings beat and Qualcomm's optimistic guidance, Open AI announced that this company will delay its IPO until next year. This moves along with SpaceX’s volatile post-IPO performance have raised concerns among investors amid the vibrant AI growth over whether current AI valuations remain sustainable, making them more cautious towards the AI stock market. Open AI seems to be reluctant to become public at this point as they said - they still have plans that will be more easily accomplished if the company is private. Moreover, Open AI is now watching SpaceX’s performance and is more cautious about going public. The weak post-IPO performance of SpaceX may have reinforced OpenAI's cautious approach toward going public. This company is waiting for its valuation to reach $1 Trillion before launching its IPO. OpenAI is reportedly considering delaying its IPO in hopes of achieving a valuation closer to $1 trillion. The market is now keeping their eyes closely on Open AI and the whole AI market to watch if this chain of events is AI euphoria or AI bubble. Investors are debating whether the current enthusiasm surrounding AI represents sustainable long-term growth or speculative excess.  Whether this euphoria can be maintained sustainably still need to be watched, as the recent weakness in stocks is driven more by valuation rather by the change in industry fundamentals.</p>
+  `
+},
+{
+  date:`25 Jun`, full:`25 Jun 2026`, dealType:`Debt Offering`, tag:`neutral`, tagLabel:`Neutral`,
+  title:`SpaceX`,
+  src:``,
+  urls:null,
+  tableHeader:[`Date`,`Deal name`,`Buyers/ Sellers`,`Deal Value`],
+  tableRow:[`06/25/2026`,`SpaceX bond offering`,`SpaceX (issuer) → institutional investors, mostly outside the US`,`$20B → upsized to $25B`],
+  body:`
+    <p>The debt offering of SpaceX does not signal the company’s problem; the real problem is whether the company’s future earnings can justify its high valuation and the market’s future expectation. Strong investor demand allowed SpaceX to increase the size of the offering from $20 billion to $25 billion. Many people are questioning if SpaceX is dealing with any financial distress after making M&A deals with Cursors,.... However, this move is primarily intended to refinance the company and to cover any existing bridge loan. Although the stock prices of SpaceX have decreased (shares have pulled back from its post-IPO highs) and its market cap value has dived slightly after its extraordinary IPO, the market’s demand still remains robust, making SpaceX have to offer $25M bonds. Investors are still having high interest in SpaceX and are keeping their eyes closely on SpaceX’s future performance, as the key question is not whether SpaceX can get capital or not, but whether its revenue and cash-flow growth in the future can justify its current high valuation.</p>
+  `
+},
+];
+
+/* ---------------- RENDER DEAL TRACKER ---------------- */
+const dealContainer = document.getElementById('dealEntries');
+function renderDeals(filter){
+  dealContainer.innerHTML = '';
+  dealEntries
+    .filter(e => filter === 'all' || e.dealType === filter)
+    .forEach((e,i)=>{
+      const det = document.createElement('details');
+      det.className = 'entry';
+      if(i===0) det.setAttribute('open','');
+      det.innerHTML = `
+        <summary>
+          <span class="date-chip">${e.date}</span>
+          <span class="ticker-chip">${e.dealType}</span>
+          <span class="entry-title">${e.title}</span>
+          <span class="tag tag-${e.tag}">${e.tagLabel}</span>
+          <span class="chevron">&#9656;</span>
+        </summary>
+        <div class="entry-body">
+          <span class="src">${srcHTML(e)}</span>
+          ${e.tableRow ? `
+          <table class="raw-table">
+            ${e.tableHeader ? `<thead><tr>${e.tableHeader.map(h=>`<th>${h}</th>`).join('')}</tr></thead>` : ''}
+            <tbody><tr>${e.tableRow.map(c=>`<td>${c}</td>`).join('')}</tr></tbody>
+          </table>` : ''}
+          ${e.body}
+        </div>
+      `;
+      dealContainer.appendChild(det);
+    });
+}
+const dealTypes = ['all', ...new Set(dealEntries.map(e=>e.dealType))];
+const dealFilterBar = document.getElementById('dealFilter');
+dealTypes.forEach(t=>{
+  const b = document.createElement('button');
+  b.textContent = t === 'all' ? `All (${dealEntries.length})` : t;
+  if(t==='all') b.classList.add('active');
+  b.addEventListener('click',()=>{
+    dealFilterBar.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    renderDeals(t);
+  });
+  dealFilterBar.appendChild(b);
+});
+renderDeals('all');
+
+const conceptPrinciples = [`<strong>Separate fact from implication</strong> - don't blend "what happened" with "what it means" in the same sentence.`,`<strong>Always include a bear case and a bull case</strong> - don't present only a one-sided view.`,`<strong>Avoid "depends on the future".</strong> Replace with specific questions: what is the market pricing in, what are the catalysts, what are the risks.`,`<strong>Verify facts carefully</strong> - avoid stating future predictions as if they were already-confirmed facts`,`<strong>Get the sequence of events right</strong>`,`<strong>Use precise financial terminology</strong>`];
+const conceptHeader = [`Concept`,`Category`,`Definition`,`Real example`];
+const conceptRows = [[`IPO (Initial Public Offering)`,`Capital Markets`,`A company's first sale of shares to the public`,`—`],[`Lock-up period`,`Capital Markets`,`The period after an IPO during which insiders are restricted from selling shares; once it expires, increased supply can pressure the price down`,`Only a fraction of shares are floated at IPO (the rest secured for staff, early investors, founders) → supply constraint plus strong demand → price surge right after the IPO`],[`Greenshoe option`,`Capital Markets`,`The right for underwriters to sell up to 15% more shares than originally planned if demand is strong, used to stabilize the price after an IPO`,`A company issues 10 million shares; with a greenshoe option, underwriters can sell up to 11.5 million. If the price surges, underwriters release the extra shares to cool the market; if the price falls below the offering price, underwriters buy back shares to support it`],[`Rally`,`Market Terms`,`A renewed price increase after a prolonged decline`,`—`],[`Watershed`,`Market Terms`,`A turning point, a moment that marks a significant shift in trend`,`—`],[`Bullish vs Bearish`,`Market Terms`,`Bullish: expecting prices to rise. Bearish: expecting prices to fall`,`—`],[`Shares have pulled back`,`Market Terms`,`The stock has fallen again after a prior rally`,`—`],[`Retrace`,`Market Terms`,`The stock price has given back part of its previous gains`,`"Stock has retraced from its post-IPO highs"`],[`Divergence`,`Market Terms`,`When two variables that usually move together start moving in different directions`,`—`],[`Re-rating`,`Market Terms`,`The market changes how it values a company even though fundamentals haven't changed much — the market decides to pay a higher or lower multiple for the same business`,`—`],[`Dovish vs Hawkish`,`Monetary Policy`,`Dovish: the Fed leans toward easing, favoring rate cuts. Hawkish: the Fed leans toward tightening, favoring rate hikes`,`—`],[`Tightening monetary policy`,`Monetary Policy`,`Raising interest rates = tightening monetary policy`,`—`],[`Higher-for-longer → falling valuations`,`Monetary Policy`,`Rates staying elevated for longer → cost of capital rises → discount rate rises → present value of future cash flows (NPV) falls → valuations fall → downward pressure on stock prices`,`A tech company earns most of its profit 10 years from now: at a 2% discount rate, $100 in the future has a relatively high present value; at 6%, that $100 is discounted much more heavily — investors are willing to pay less for the same company`],[`Hawkish Fed chain`,`Monetary Policy`,`Hawkish Fed → rates rise (or stay higher-for-longer) → bond yields rise → discount rate rises → growth stocks fall`,`—`],[`Dovish Fed chain`,`Monetary Policy`,`Dovish Fed → rates fall → bond yields fall → discount rate falls → growth stocks rise`,`—`],[`Analyst thinking chain (geopolitical event)`,`Monetary Policy`,`Analysts don't stop at "war makes stocks fall" — they trace the chain through to the final variable: interest rates and valuation`,`Iran tension → oil rises → inflation expectations rise → Fed holds rates higher for longer → tech/growth valuations fall → S&P 500/Nasdaq futures decline`],[`Fundamentals`,`Corporate Finance`,`The actual underlying business performance of a company or the economy`,`—`],[`Debt offering / Bond offering`,`Corporate Finance`,`An entity raises capital by issuing debt to investors instead of selling equity — committing to repay principal plus interest in the future`,`—`],[`Hyperscaler`,`Corporate Finance`,`A company that owns and operates cloud computing infrastructure at massive scale, building hundreds or thousands of data centers globally to provide cloud and AI services`,`—`],[`Monetization`,`Corporate Finance`,`Turning a product or technology into actual revenue and profit`,`—`],[`Dilution (Dilute)`,`Corporate Finance`,`A reduction in existing shareholders' ownership percentage when a company issues new shares`,`—`]];
+
+/* ---------------- RENDER CONCEPTS ---------------- */
+document.getElementById('conceptsCount').textContent = conceptRows.length + ' concepts logged';
+
+const principlesBox = document.getElementById('principlesBox');
+principlesBox.innerHTML = '<ul>' + conceptPrinciples.map(p => `<li>${p}</li>`).join('') + '</ul>';
+
+const conceptTableHead = document.getElementById('conceptTableHead');
+conceptTableHead.innerHTML = conceptHeader.map(h => `<th>${h}</th>`).join('');
+
+const conceptTableBody = document.getElementById('conceptTableBody');
+function renderConcepts(filter){
+  conceptTableBody.innerHTML = '';
+  conceptRows
+    .filter(row => filter === 'all' || row[1] === filter)
+    .forEach(row => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${row[0]}</td>
+        <td><span class="cat-pill">${row[1]}</span></td>
+        <td>${row[2]}</td>
+        <td>${row[3]}</td>
+      `;
+      conceptTableBody.appendChild(tr);
+    });
+}
+const categories = ['all', ...new Set(conceptRows.map(r => r[1]))];
+const conceptFilterBar = document.getElementById('conceptFilter');
+categories.forEach(cat => {
+  const b = document.createElement('button');
+  b.textContent = cat === 'all' ? `All (${conceptRows.length})` : cat;
+  if(cat === 'all') b.classList.add('active');
+  b.addEventListener('click', () => {
+    conceptFilterBar.querySelectorAll('button').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    renderConcepts(cat);
+  });
+  conceptFilterBar.appendChild(b);
+});
+renderConcepts('all');
+
+/* ---------------- TICKER TAPE ---------------- */
+const arrow = {bullish:'&#9650;',bearish:'&#9660;',cautious:'&#9660;',neutral:'&#9679;',mixed:'&#9670;'};
+const cls = {bullish:'up',bearish:'down',cautious:'down',neutral:'flat',mixed:'flat'};
+let tapeHTML = entries.map(e=>`<span><b>${e.date}</b> ${e.title.split(' ').slice(0,6).join(' ')}&hellip; <span class="${cls[e.tag]}">${arrow[e.tag]} ${e.tagLabel}</span></span>`).join('');
+document.getElementById('tickerTape').innerHTML = tapeHTML + tapeHTML;
+</script>
+
+</body>
+</html>
